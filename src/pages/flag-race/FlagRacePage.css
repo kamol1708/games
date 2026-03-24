@@ -1,0 +1,293 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@500;700;800&display=swap');
+
+.fr-page {
+  min-height: 100vh;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 0% 0%, #ffe6f4 0%, transparent 34%),
+    radial-gradient(circle at 95% 8%, #dbf4ff 0%, transparent 35%),
+    linear-gradient(180deg, #f8fbff 0%, #edf3ff 100%);
+  font-family: 'Nunito Sans', sans-serif;
+  color: #1f3550;
+}
+
+.fr-setup-card,
+.fr-finish-card,
+.fr-game-shell {
+  max-width: 1220px;
+  margin: 0 auto;
+  border: 1px solid #d4e3f0;
+  border-radius: 24px;
+  background: #fffffff2;
+  box-shadow: 0 14px 30px rgba(71, 105, 141, 0.12);
+}
+
+.fr-setup-card,
+.fr-finish-card {
+  max-width: 760px;
+  margin-top: 6vh;
+  padding: 24px;
+}
+
+.fr-setup-card h1,
+.fr-finish-card h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+}
+
+.fr-setup-card p {
+  margin: 12px 0 0;
+  line-height: 1.5;
+  color: #48647f;
+}
+
+.fr-points {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.fr-points span {
+  font-weight: 800;
+}
+
+.fr-points strong {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e3edf8;
+  font-size: 0.95rem;
+}
+
+.fr-inputs {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fr-inputs input {
+  border: 1px solid #c7d9e8;
+  border-radius: 14px;
+  height: 52px;
+  padding: 0 14px;
+  font-size: 1rem;
+  color: #1f3b59;
+}
+
+.fr-inputs input:focus {
+  outline: 2px solid #1ea0e7;
+  border-color: #1ea0e7;
+}
+
+.fr-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+}
+
+.fr-actions button {
+  border: none;
+  border-radius: 12px;
+  height: 46px;
+  padding: 0 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fr-back {
+  background: #dce7f2;
+  color: #2e4e6c;
+}
+
+.fr-start {
+  background: linear-gradient(90deg, #1ea0e7, #167dc5);
+  color: #fff;
+}
+
+.fr-error {
+  margin: 10px 0 0;
+  color: #cb3f35;
+  font-weight: 700;
+}
+
+.fr-game-shell {
+  padding: 16px;
+}
+
+.fr-top {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.fr-score-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f4f9ff;
+  border: 1px solid #d4e3f0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.fr-score-table th,
+.fr-score-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #d4e3f0;
+}
+
+.fr-score-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.fr-round-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #d4e3f0;
+  border-radius: 16px;
+  background: #f7fbff;
+  padding: 12px 14px;
+}
+
+.fr-round-box p,
+.fr-round-box span {
+  margin: 0;
+  font-weight: 700;
+  color: #4d6784;
+}
+
+.fr-round-box strong {
+  font-size: clamp(1.2rem, 2.6vw, 2rem);
+  color: #1e7dc5;
+}
+
+.fr-flag-stage {
+  margin-top: 12px;
+  border: 1px solid #d4e3f0;
+  border-radius: 18px;
+  background: #f9fcff;
+  padding: 18px;
+  text-align: center;
+}
+
+.fr-difficulty {
+  margin: 0;
+  font-weight: 800;
+}
+
+.fr-difficulty.fr-easy {
+  color: #148e62;
+}
+
+.fr-difficulty.fr-medium {
+  color: #cd7f00;
+}
+
+.fr-difficulty.fr-hard {
+  color: #bf2e3f;
+}
+
+.fr-flag {
+  margin-top: 6px;
+  font-size: clamp(4.8rem, 10vw, 8rem);
+  line-height: 1;
+}
+
+.fr-status {
+  margin: 8px 0 0;
+  color: #45637f;
+  font-weight: 700;
+}
+
+.fr-team-answers {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.fr-team-card {
+  border: 1px solid #d4e3f0;
+  border-radius: 16px;
+  background: #f8fcff;
+  padding: 14px;
+}
+
+.fr-team-card h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+}
+
+.fr-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.fr-options button {
+  border: none;
+  border-radius: 12px;
+  min-height: 54px;
+  padding: 8px;
+  background: #ddeaf7;
+  color: #1e3651;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fr-options button:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+.fr-finish-card {
+  text-align: center;
+}
+
+.fr-finish-winner {
+  margin: 10px 0 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.fr-finish-score {
+  margin: 10px 0 0;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 920px) {
+  .fr-top {
+    grid-template-columns: 1fr;
+  }
+
+  .fr-team-answers {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .fr-page {
+    padding: 12px;
+  }
+
+  .fr-setup-card,
+  .fr-finish-card,
+  .fr-game-shell {
+    border-radius: 18px;
+  }
+
+  .fr-inputs,
+  .fr-options {
+    grid-template-columns: 1fr;
+  }
+
+  .fr-round-box {
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    justify-content: center;
+  }
+}

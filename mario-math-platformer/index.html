@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mario Math Platformer</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        background:
+          radial-gradient(900px 500px at 10% 6%, rgba(124, 58, 237, 0.16), transparent 60%),
+          radial-gradient(900px 500px at 90% 8%, rgba(59, 130, 246, 0.16), transparent 60%),
+          #05060a;
+        color: #eef2ff;
+      }
+      #app {
+        min-height: 100vh;
+      }
+      #quiz-overlay.hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <div id="quiz-overlay" class="hidden" aria-hidden="true">
+      <div class="quiz-backdrop">
+        <div class="quiz-card" role="dialog" aria-modal="true" aria-labelledby="quiz-title">
+          <p class="quiz-eyebrow">Math Quiz</p>
+          <h2 id="quiz-title">Savol</h2>
+          <p id="quiz-meta"></p>
+          <p id="quiz-prompt"></p>
+
+          <form id="quiz-form">
+            <input id="quiz-input" type="text" inputmode="numeric" autocomplete="off" />
+            <button id="quiz-submit" type="submit">Submit</button>
+          </form>
+
+          <div class="quiz-footer">
+            <div id="quiz-timer-pill">15s</div>
+            <p id="quiz-error" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+  </html>

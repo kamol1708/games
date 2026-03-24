@@ -1,0 +1,295 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Nunito+Sans:wght@600;700;800&display=swap');
+
+.wof-page {
+  min-height: 100vh;
+  padding: 18px;
+  font-family: 'Nunito Sans', sans-serif;
+  color: #10263f;
+  background:
+    radial-gradient(circle at 7% 8%, #ffe7d4 0%, transparent 36%),
+    radial-gradient(circle at 90% 12%, #d8f3ff 0%, transparent 37%),
+    linear-gradient(180deg, #f8fbff 0%, #edf4ff 100%);
+}
+
+.wof-shell {
+  max-width: 1380px;
+  margin: 0 auto;
+  border: 1px solid #d4e3f1;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 252, 255, 0.92) 100%);
+  padding: 14px;
+  box-shadow: 0 22px 42px rgba(52, 86, 119, 0.14);
+}
+
+.wof-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wof-head h1 {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.wof-back,
+.wof-reset,
+.wof-start,
+.wof-spin {
+  border: none;
+  border-radius: 999px;
+  height: 40px;
+  padding: 0 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.wof-back {
+  background: #dceaf7;
+  color: #294a68;
+}
+
+.wof-reset {
+  background: #e5f3eb;
+  color: #0d7550;
+}
+
+.wof-main {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1.35fr 0.95fr;
+  gap: 12px;
+}
+
+.wof-wheel-card,
+.wof-scoreboard,
+.wof-history,
+.wof-setup {
+  border: 1px solid #d4e4f1;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  padding: 12px;
+}
+
+.wof-turn-tag {
+  font-weight: 800;
+  color: #274a6b;
+}
+
+.wof-wheel-zone {
+  margin-top: 8px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 10px 0;
+}
+
+.wof-pointer {
+  position: absolute;
+  top: 2px;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 20px solid #ff5466;
+  z-index: 4;
+}
+
+.wof-wheel {
+  position: relative;
+  width: min(74vw, 430px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 10px solid #fff;
+  box-shadow:
+    0 14px 24px rgba(55, 84, 113, 0.2),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+  transition: transform 4.2s cubic-bezier(0.14, 0.92, 0.13, 1);
+}
+
+.wof-segment-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #11324f;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.wof-segment-label b {
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.wof-wheel-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 30% 25%, #fff 0%, #ffe9c5 45%, #f7b55a 100%);
+  border: 3px solid #fff;
+  box-shadow: 0 4px 9px rgba(0, 0, 0, 0.16);
+}
+
+.wof-wheel-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.wof-spin {
+  background: linear-gradient(90deg, #0ea5e9, #0a7ac8);
+  color: #fff;
+  min-width: 180px;
+}
+
+.wof-spin:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wof-side {
+  display: grid;
+  gap: 10px;
+}
+
+.wof-scoreboard h2,
+.wof-history h2,
+.wof-setup h2 {
+  margin: 0;
+  font-size: 1.06rem;
+}
+
+.wof-scoreboard ul,
+.wof-history ul {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.wof-scoreboard li,
+.wof-history li {
+  border-radius: 10px;
+  border: 1px solid #d6e4f0;
+  background: #fff;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.wof-history li {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.wof-setup {
+  margin-top: 12px;
+  max-width: 760px;
+}
+
+.wof-setup p {
+  margin: 6px 0 0;
+  color: #4a6987;
+}
+
+.wof-student-input {
+  margin-top: 8px;
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid #c8d9e8;
+  border-radius: 10px;
+  padding: 10px;
+  font-family: inherit;
+  font-weight: 700;
+  color: #214564;
+  resize: vertical;
+}
+
+.wof-start {
+  margin-top: 10px;
+  background: linear-gradient(90deg, #f97316, #ea580c);
+  color: #fff;
+}
+
+.wof-error {
+  margin: 8px 0 0;
+  color: #c74234;
+  font-weight: 700;
+}
+
+.wof-student-pick,
+.wof-qtext,
+.wof-qmeta {
+  margin: 8px 0 0;
+  color: #294d6f;
+}
+
+.wof-qtext {
+  font-weight: 700;
+}
+
+.wof-muted {
+  margin: 8px 0 0;
+  color: #587392;
+}
+
+.wof-judge {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.wof-judge button {
+  border: none;
+  border-radius: 10px;
+  min-height: 44px;
+  font-weight: 800;
+  cursor: pointer;
+  background: #dbe9f7;
+  color: #1e3f5f;
+}
+
+@media (max-width: 980px) {
+  .wof-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .wof-page {
+    padding: 10px;
+  }
+
+  .wof-shell {
+    border-radius: 16px;
+    padding: 10px;
+  }
+
+  .wof-head {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .wof-head h1 {
+    width: 100%;
+    order: -1;
+    text-align: center;
+  }
+
+  .wof-judge {
+    grid-template-columns: 1fr;
+  }
+}

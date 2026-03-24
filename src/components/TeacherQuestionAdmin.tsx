@@ -1,0 +1,476 @@
+import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
+import {
+  getTeacherItems,
+  saveTeacherItemsToBackend,
+  syncTeacherItemsFromBackend,
+  type TeacherGameKey,
+} from '../lib/teacherContent'
+
+type GameOption = {
+  key: TeacherGameKey
+  label: string
+  subtitle: string
+  badge: string
+  formMode: 'generic' | 'unsupported' | 'special'
+  note?: string
+}
+
+type QuestionForm = {
+  title: string
+  story: string
+  question: string
+  option1: string
+  option2: string
+  option3: string
+  option4: string
+  correctOption: '1' | '2' | '3' | '4'
+  timer: string
+  hint: string
+  difficulty: 'easy' | 'medium' | 'hard'
+}
+
+type TeacherQuestionItem = {
+  title: string
+  story?: string
+  question: string
+  text?: string
+  variants: string[]
+  options?: string[]
+  answer: string
+  correctOption: number
+  timer: number
+  seconds?: number
+  hint?: string
+  difficulty: 'easy' | 'medium' | 'hard'
+  level?: 'easy' | 'medium' | 'hard'
+  points?: number
+  reward?: number
+  category?: string
+  gameKey: TeacherGameKey
+  createdAt: number
+}
+
+const gameOptions: GameOption[] = [
+  { key: 'treasure-hunt', label: 'Treasure Hunt', subtitle: 'Xazina topish sarguzashti', badge: 'Adventure', formMode: 'generic' },
+  { key: 'quiz-battle', label: 'Quiz Battle', subtitle: 'Tezkor viktorina jangi', badge: 'Quiz', formMode: 'generic' },
+  { key: 'tug-of-war', label: 'Tug of War', subtitle: 'Jamoaviy savol tortishuvi', badge: 'Battle', formMode: 'special', note: 'Maxsus raqamli format kerak' },
+  { key: 'word-search', label: 'Word Search', subtitle: 'So‘z topish o‘yini', badge: 'Words', formMode: 'special', note: 'Faqat so‘z ro‘yxati formatida' },
+  { key: 'memory-rush', label: 'Memory Rush', subtitle: 'Xotira kartalari', badge: 'Memory', formMode: 'unsupported', note: 'Savol formasi ishlamaydi' },
+  { key: 'football-challenge', label: 'Football Challenge', subtitle: 'Sport savollari', badge: 'Sport', formMode: 'generic' },
+  { key: 'wheel-of-fortune', label: 'Wheel of Fortune', subtitle: 'Aylana savollar', badge: 'Wheel', formMode: 'generic' },
+  { key: 'flag-race', label: 'Flag Race', subtitle: 'Bayroq poygasi', badge: 'Flags', formMode: 'unsupported', note: 'Hozircha teacher savol ulangan emas' },
+  { key: 'flag-player-race', label: 'Flag Player Race', subtitle: 'Futbolchi va davlat', badge: 'Players', formMode: 'unsupported', note: 'Hozircha teacher savol ulangan emas' },
+  { key: 'learning', label: 'Learning Hub', subtitle: 'Dars va mashq kontenti', badge: 'Learn', formMode: 'unsupported', note: 'Bu forma bilan mos emas' },
+  { key: 'bilim-poyezdi', label: 'Bilim Poyezdi', subtitle: 'Stansiya savollari', badge: 'Train', formMode: 'unsupported', note: 'Maxsus stansiya track formasi kerak' },
+]
+
+const genericGameOptions = gameOptions.filter((item) => item.formMode === 'generic')
+
+const initialForm: QuestionForm = {
+  title: '',
+  story: '',
+  question: '',
+  option1: '',
+  option2: '',
+  option3: '',
+  option4: '',
+  correctOption: '1',
+  timer: '120',
+  hint: '',
+  difficulty: 'medium',
+}
+
+function emptyToUndefined(value: string) {
+  const trimmed = value.trim()
+  return trimmed ? trimmed : undefined
+}
+
+function mapFormToItem(form: QuestionForm, selectedKey: TeacherGameKey): TeacherQuestionItem {
+  const variants = [form.option1, form.option2, form.option3, form.option4].map((v) => v.trim()).filter(Boolean)
+  const correctIdx = Math.max(0, Math.min(3, Number(form.correctOption) - 1))
+  const safeAnswer = variants[correctIdx] ?? variants[0] ?? ''
+  const timerNum = Number(form.timer)
+  const timer = Number.isFinite(timerNum) && timerNum > 0 ? timerNum : 120
+  const difficulty = form.difficulty
+  const pointsByDifficulty = { easy: 10, medium: 15, hard: 20 } as const
+  const rewardByDifficulty = { easy: 200, medium: 300, hard: 500 } as const
+  return {
+    title: form.title.trim(),
+    story: emptyToUndefined(form.story),
+    question: form.question.trim(),
+    text: form.question.trim(),
+    variants,
+    options: variants,
+    answer: safeAnswer,
+    correctOption: correctIdx + 1,
+    timer,
+    seconds: timer,
+    hint: emptyToUndefined(form.hint),
+    difficulty,
+    level: difficulty,
+    points: pointsByDifficulty[difficulty],
+    reward: rewardByDifficulty[difficulty],
+    category: "Bilim",
+    gameKey: selectedKey,
+    createdAt: Date.now(),
+  }
+}
+
+export default function TeacherQuestionAdmin() {
+  const [selectedKey, setSelectedKey] = useState<TeacherGameKey>(genericGameOptions[0]?.key ?? 'treasure-hunt')
+  const [form, setForm] = useState<QuestionForm>(initialForm)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [version, setVersion] = useState(0)
+  const [itemSearch, setItemSearch] = useState('')
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [showGamePicker, setShowGamePicker] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
+
+  const selectedOption = useMemo(
+    () => gameOptions.find((item) => item.key === selectedKey) ?? gameOptions[0],
+    [selectedKey],
+  )
+
+  const items = useMemo(() => getTeacherItems<TeacherQuestionItem>(selectedKey), [selectedKey, version])
+
+  const filteredItems = useMemo(() => {
+    const q = itemSearch.trim().toLowerCase()
+    if (!q) return items
+    return items.filter(
+      (item) =>
+        item.title.toLowerCase().includes(q) ||
+        item.question.toLowerCase().includes(q) ||
+        (item.hint ?? '').toLowerCase().includes(q),
+    )
+  }, [items, itemSearch])
+
+  const handleChangeGame = (nextKey: TeacherGameKey) => {
+    setSelectedKey(nextKey)
+    setShowGamePicker(false)
+    setError('')
+    setSuccess('')
+  }
+
+  const handleFormChange = <K extends keyof QuestionForm>(key: K, value: QuestionForm[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }))
+    setError('')
+    setSuccess('')
+  }
+
+  const handleAdd = async () => {
+    if (selectedOption.formMode !== 'generic') {
+      setError(`${selectedOption.label} uchun bu forma mos emas. Maxsus forma kerak.`)
+      return
+    }
+    const variants = [form.option1, form.option2, form.option3, form.option4].map((v) => v.trim()).filter(Boolean)
+    if (form.title.trim().length < 2) {
+      setError('Sarlavha kiriting.')
+      return
+    }
+    if (form.question.trim().length < 4) {
+      setError('Savol matnini kiriting.')
+      return
+    }
+    if (variants.length < 2) {
+      setError('Kamida 2 ta variant kiriting.')
+      return
+    }
+    try {
+      setIsSyncing(true)
+      const payload = mapFormToItem(form, selectedKey)
+      const nextItems = [...items, payload]
+      await saveTeacherItemsToBackend(selectedKey, nextItems)
+      setVersion((v) => v + 1)
+      setError('')
+      setSuccess(`"${selectedOption.label}" o‘yiniga savol qo‘shildi.`)
+      setShowAddForm(false)
+      setShowGamePicker(false)
+      setForm((prev) => ({
+        ...initialForm,
+        timer: prev.timer || '120',
+        difficulty: prev.difficulty,
+      }))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Saqlashda xatolik yuz berdi.')
+      setSuccess('')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
+  const handleClear = async () => {
+    try {
+      setIsSyncing(true)
+      await saveTeacherItemsToBackend(selectedKey, [])
+      setVersion((v) => v + 1)
+      setError('')
+      setSuccess(`${selectedOption.label} savollari tozalandi.`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Tozalashda xatolik yuz berdi.')
+      setSuccess('')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!showAddForm) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setShowAddForm(false)
+      setShowGamePicker(false)
+      setError('')
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [showAddForm])
+
+  useEffect(() => {
+    const openFromHeader = () => {
+      setShowAddForm(true)
+      setShowGamePicker(false)
+      setError('')
+      setSuccess('')
+    }
+    window.addEventListener('teacher-question-admin:open-add-modal', openFromHeader as EventListener)
+    return () => window.removeEventListener('teacher-question-admin:open-add-modal', openFromHeader as EventListener)
+  }, [])
+
+  useEffect(() => {
+    let ignore = false
+
+    const run = async () => {
+      try {
+        setIsSyncing(true)
+        await syncTeacherItemsFromBackend<TeacherQuestionItem>(selectedKey)
+        if (!ignore) {
+          setVersion((v) => v + 1)
+        }
+      } catch {
+        // keep existing local data if backend read fails
+      } finally {
+        if (!ignore) {
+          setIsSyncing(false)
+        }
+      }
+    }
+
+    void run()
+    return () => {
+      ignore = true
+    }
+  }, [selectedKey])
+
+  return (
+    <section className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[0_20px_70px_rgba(0,0,0,.28)] backdrop-blur-xl sm:p-5">
+      <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="text-base font-semibold text-white">Savollar ro‘yxati</h4>
+            <div className="flex items-center gap-2">
+              <input
+                value={itemSearch}
+                onChange={(e) => setItemSearch(e.target.value)}
+                placeholder="Savol qidirish..."
+                className="h-9 rounded-lg border border-white/10 bg-white/5 px-3 text-xs text-white outline-none placeholder:text-white/35 focus:border-sky-300/30 focus:ring-2 focus:ring-sky-500/15"
+              />
+              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/70">
+                {filteredItems.length}/{items.length}
+              </span>
+              {isSyncing ? <span className="text-xs text-sky-200/80">Sync...</span> : null}
+            </div>
+          </div>
+          {selectedOption.note ? (
+            <div className="mt-3 rounded-xl border border-amber-300/20 bg-amber-400/10 p-3 text-xs text-amber-100/90">
+              {selectedOption.label}: {selectedOption.note}
+            </div>
+          ) : null}
+
+          <div className="mt-3 space-y-2">
+            {items.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm text-white/55">
+                Hozircha savol yo‘q. Teacher Control Center ichidagi <span className="text-sky-200">Savol qo‘shish</span> tugmasini bosib qo‘shing.
+              </div>
+            ) : (
+              filteredItems.map((item, index) => (
+                <div key={`${item.createdAt}-${index}`} className="rounded-xl border border-white/10 bg-[#0c1018] p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{item.title || `Savol #${index + 1}`}</p>
+                      <p className="mt-0.5 text-xs text-white/50">
+                        {item.difficulty.toUpperCase()} · {item.timer}s · Javob: {item.correctOption}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          setIsSyncing(true)
+                          const next = [...items.slice(0, index), ...items.slice(index + 1)]
+                          await saveTeacherItemsToBackend(selectedKey, next)
+                          setVersion((v) => v + 1)
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : 'Savolni o‘chirishda xatolik.')
+                        } finally {
+                          setIsSyncing(false)
+                        }
+                      }}
+                      className="rounded-lg border border-rose-300/20 bg-rose-500/10 px-2.5 py-1 text-xs font-medium text-rose-200 hover:bg-rose-500/20"
+                    >
+                      O‘chirish
+                    </button>
+                  </div>
+
+                  <div className="mt-2 rounded-lg border border-white/5 bg-black/25 p-2.5">
+                    <p className="text-xs uppercase tracking-[0.12em] text-white/40">Savol</p>
+                    <p className="mt-1 text-sm text-white/85">{item.question}</p>
+                    {item.story ? <p className="mt-2 text-xs text-white/55">Hikoya: {item.story}</p> : null}
+                    {item.hint ? <p className="mt-1 text-xs text-sky-200/80">Hint: {item.hint}</p> : null}
+                    <div className="mt-2 grid gap-1">
+                      {item.variants.map((variant, i) => (
+                        <div
+                          key={`${item.createdAt}-${i}`}
+                          className={`rounded-md border px-2 py-1 text-xs ${
+                            i + 1 === item.correctOption
+                              ? 'border-emerald-300/20 bg-emerald-400/10 text-emerald-100'
+                              : 'border-white/10 bg-white/5 text-white/75'
+                          }`}
+                        >
+                          {i + 1}. {variant}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+
+            {items.length > 0 && filteredItems.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm text-white/55">
+                Qidiruv bo‘yicha natija topilmadi.
+              </div>
+            ) : null}
+          </div>
+      </div>
+
+      {showAddForm && typeof document !== 'undefined'
+        ? createPortal((
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-black"
+          onClick={() => {
+            setShowAddForm(false)
+            setShowGamePicker(false)
+            setError('')
+          }}
+        >
+          <div className="pointer-events-none fixed inset-0 bg-black" />
+          <div className="relative z-[1] flex min-h-full w-full items-start justify-center p-3 sm:p-6">
+            <div
+              className="w-[min(1180px,100%)] animate-[teacher-admin-modal-drop_.22s_ease-out] rounded-3xl border border-white/10 bg-[#05070c] p-4 shadow-[0_28px_90px_rgba(0,0,0,.85)] sm:p-5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-300/80">Savol Qo‘shish</p>
+                <h4 className="mt-1 text-lg font-semibold text-white">Katta modal forma</h4>
+                <p className="mt-1 text-xs text-white/50">Formani to‘ldiring, o‘yinni tanlang va saqlang.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddForm(false)
+                  setShowGamePicker(false)
+                  setError('')
+                }}
+                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/10"
+              >
+                Yopish ✕
+              </button>
+            </div>
+
+              <div className="grid max-h-[calc(100vh-210px)] gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+              <input value={form.title} onChange={(e) => handleFormChange('title', e.target.value)} placeholder="📄 Sarlavha" className="h-11 rounded-xl border border-cyan-300/20 bg-[#081423] px-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-cyan-300/50 focus:ring-2 focus:ring-cyan-400/20" />
+              <input value={form.story} onChange={(e) => handleFormChange('story', e.target.value)} placeholder="📘 Hikoya" className="h-11 rounded-xl border border-violet-300/20 bg-[#100d22] px-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-violet-300/50 focus:ring-2 focus:ring-violet-400/20" />
+              <input value={form.question} onChange={(e) => handleFormChange('question', e.target.value)} placeholder="❓ Savol" className="h-11 rounded-xl border border-fuchsia-300/20 bg-[#180b1d] px-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-fuchsia-300/50 focus:ring-2 focus:ring-fuchsia-400/20 sm:col-span-2" />
+              <input value={form.option1} onChange={(e) => handleFormChange('option1', e.target.value)} placeholder="1-variant" className="h-11 rounded-xl border border-sky-300/15 bg-[#0a1525] px-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-sky-300/50 focus:ring-2 focus:ring-sky-500/15" />
+              <input value={form.option2} onChange={(e) => handleFormChange('option2', e.target.value)} placeholder="2-variant" className="h-11 rounded-xl border border-sky-300/15 bg-[#0b1320] px-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-sky-300/50 focus:ring-2 focus:ring-sky-500/15" />
+              <input value={form.option3} onChange={(e) => handleFormChange('option3', e.target.value)} placeholder="3-variant" className="h-11 rounded-xl border border-emerald-300/15 bg-[#091712] px-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-emerald-300/50 focus:ring-2 focus:ring-emerald-500/15" />
+              <input value={form.option4} onChange={(e) => handleFormChange('option4', e.target.value)} placeholder="4-variant" className="h-11 rounded-xl border border-amber-300/15 bg-[#1a1208] px-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-amber-300/50 focus:ring-2 focus:ring-amber-500/15" />
+
+              <select value={form.correctOption} onChange={(e) => handleFormChange('correctOption', e.target.value as QuestionForm['correctOption'])} className="h-11 rounded-xl border border-emerald-300/20 bg-[#0a1713] px-3 text-sm text-white outline-none focus:border-emerald-300/50 focus:ring-2 focus:ring-emerald-500/20">
+                <option value="1">✅ Javob: 1</option>
+                <option value="2">✅ Javob: 2</option>
+                <option value="3">✅ Javob: 3</option>
+                <option value="4">✅ Javob: 4</option>
+              </select>
+
+              <div className="grid grid-cols-2 gap-2">
+                <input value={form.timer} onChange={(e) => handleFormChange('timer', e.target.value)} placeholder="120" inputMode="numeric" className="h-11 rounded-xl border border-orange-300/20 bg-[#1a1008] px-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-orange-300/50 focus:ring-2 focus:ring-orange-500/20" />
+                <select value={form.difficulty} onChange={(e) => handleFormChange('difficulty', e.target.value as QuestionForm['difficulty'])} className="h-11 rounded-xl border border-indigo-300/20 bg-[#100f1f] px-3 text-sm text-white outline-none focus:border-indigo-300/50 focus:ring-2 focus:ring-indigo-500/20">
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+
+              <input value={form.hint} onChange={(e) => handleFormChange('hint', e.target.value)} placeholder="💡 Hint" className="h-11 rounded-xl border border-teal-300/20 bg-[#081718] px-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-teal-300/50 focus:ring-2 focus:ring-teal-500/20 sm:col-span-2" />
+            </div>
+
+              {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
+              {success ? <p className="mt-3 text-sm text-emerald-300">{success}</p> : null}
+
+              <div className="relative mt-3 flex flex-wrap items-center gap-2">
+                <div className="relative">
+                  <button type="button" onClick={() => setShowGamePicker((v) => !v)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/10">
+                    Qaysi o‘yinga qo‘shmoqchisiz? <span className="ml-1 text-sky-200">{selectedOption.label}</span>
+                  </button>
+                  {showGamePicker ? (
+                    <div className="absolute left-0 top-full z-10 mt-2 w-[340px] max-w-[85vw] rounded-2xl border border-white/10 bg-[#080b13] p-2 shadow-[0_12px_30px_rgba(0,0,0,.45)]">
+                      <div className="max-h-64 space-y-1 overflow-auto pr-1">
+                      {gameOptions.map((item) => (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => {
+                            if (item.formMode === 'unsupported') return
+                            handleChangeGame(item.key)
+                          }}
+                          className={`w-full rounded-xl border px-3 py-2 text-left transition ${
+                            item.formMode === 'unsupported'
+                              ? 'cursor-not-allowed border-white/10 bg-white/[0.03] text-white/35'
+                              : selectedKey === item.key
+                                ? 'border-sky-300/30 bg-sky-400/10 text-sky-100'
+                                : 'border-white/10 bg-white/5 text-white/75 hover:bg-white/10'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="truncate text-sm font-semibold">{item.label}</div>
+                              <div className="mt-0.5 truncate text-xs opacity-75">{item.note ?? item.subtitle}</div>
+                            </div>
+                              <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em]">
+                                {item.formMode === 'unsupported' ? 'LOCK' : item.formMode === 'special' ? 'SPECIAL' : item.badge}
+                              </span>
+                          </div>
+                        </button>
+                      ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+                <button type="button" onClick={() => void handleAdd()} disabled={isSyncing} className="rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(59,130,246,.28)] disabled:cursor-not-allowed disabled:opacity-50">
+                  + Save / Qo‘shish
+                </button>
+                <button type="button" onClick={() => void handleClear()} disabled={isSyncing} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50">
+                  Shu o‘yin savollarini tozalash
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        ), document.body)
+        : null}
+    </section>
+  )
+}

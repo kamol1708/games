@@ -1,0 +1,69 @@
+<svg width="620" height="760" viewBox="0 0 620 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="cap" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(260 150) rotate(82) scale(210 230)">
+      <stop offset="0" stop-color="#8FE8FF"/>
+      <stop offset="0.62" stop-color="#4CCDF6"/>
+      <stop offset="1" stop-color="#2BAEDE"/>
+    </radialGradient>
+    <radialGradient id="face" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(250 300) rotate(86) scale(250 220)">
+      <stop offset="0" stop-color="#FFB090"/>
+      <stop offset="0.62" stop-color="#FF8155"/>
+      <stop offset="1" stop-color="#FF5424"/>
+    </radialGradient>
+    <radialGradient id="mouth" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(265 355) rotate(90) scale(85 130)">
+      <stop offset="0" stop-color="#E0295E"/>
+      <stop offset="1" stop-color="#B90E40"/>
+    </radialGradient>
+    <linearGradient id="yellowArm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFD33B"/>
+      <stop offset="1" stop-color="#F0A900"/>
+    </linearGradient>
+    <linearGradient id="bodyStripe" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#35C0EC"/>
+      <stop offset="1" stop-color="#1D84B2"/>
+    </linearGradient>
+    <filter id="shadow" x="22" y="30" width="560" height="700" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#8D8D8D" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <ellipse cx="122" cy="125" rx="38" ry="34" fill="#3ABDE9"/>
+    <ellipse cx="122" cy="127" rx="27" ry="24" fill="#F0F0F0"/>
+    <ellipse cx="355" cy="107" rx="42" ry="36" fill="#3ABDE9"/>
+    <ellipse cx="355" cy="109" rx="29" ry="24" fill="#F28F79"/>
+
+    <path d="M70 170C70 83 150 46 262 46H306C421 46 496 120 496 205V228C496 282 468 320 432 349C410 367 404 396 404 424V452H163V422C163 390 150 366 121 346C88 324 70 289 70 238V170Z" fill="url(#cap)"/>
+
+    <ellipse cx="190" cy="168" rx="15" ry="14" fill="#121212"/>
+    <ellipse cx="292" cy="163" rx="15" ry="14" fill="#121212"/>
+    <path d="M223 166L246 161" stroke="#222" stroke-width="4" stroke-linecap="round"/>
+    <path d="M246 161L248 170" stroke="#222" stroke-width="4" stroke-linecap="round"/>
+
+    <path d="M84 287C84 196 154 138 244 138C335 138 400 204 400 295V352C400 455 328 532 236 532C144 532 76 457 76 365V306C76 298 79 292 84 287Z" fill="url(#face)"/>
+
+    <path d="M140 302C140 264 171 236 208 236H273C326 236 363 273 363 325C363 351 352 373 331 389C312 403 288 411 258 412H208C168 412 140 381 140 342V302Z" fill="url(#mouth)"/>
+    <ellipse cx="251" cy="365" rx="74" ry="38" fill="#E23464"/>
+    <ellipse cx="250" cy="355" rx="46" ry="13" fill="#F66A94" opacity="0.45"/>
+
+    <rect x="182" y="230" width="52" height="46" rx="20" fill="#FFF2DE"/>
+    <rect x="228" y="230" width="52" height="46" rx="20" fill="#F6C72F"/>
+    <rect x="275" y="230" width="52" height="46" rx="20" fill="#FFF2DE"/>
+    <path d="M254 243L261 254H273L263 260L267 272L254 265L242 272L246 260L236 254H248L254 243Z" fill="#FFF8DF"/>
+
+    <path d="M225 451H347C380 451 407 478 410 512H172C175 478 192 451 225 451Z" fill="#4BA73A"/>
+    <path d="M203 481H383V534H203V481Z" fill="url(#bodyStripe)"/>
+    <path d="M203 534H383V565H203V534Z" fill="#F0A900"/>
+
+    <path d="M395 404C435 359 455 308 485 238C493 219 511 213 529 221C547 229 555 249 548 269C519 347 495 414 431 455L395 404Z" fill="url(#yellowArm)"/>
+    <path d="M480 244C500 225 530 226 548 248C566 270 563 302 541 319C518 337 486 334 469 312C452 289 459 262 480 244Z" fill="#F7EFE3"/>
+
+    <path d="M124 539C107 582 98 619 82 660C75 677 57 684 39 678C21 672 11 654 17 637C31 592 42 551 60 511L124 539Z" fill="url(#yellowArm)"/>
+    <path d="M17 637C39 624 67 630 79 651C91 672 84 700 61 710C38 719 12 711 2 690C-8 670 -4 649 17 637Z" fill="#F7EFE3"/>
+
+    <path d="M229 565H279V720H229V565Z" fill="#2FA4CE"/>
+    <path d="M279 565H326V720H279V565Z" fill="#2FA4CE"/>
+    <path d="M229 720H279V760H229V720Z" fill="#DD2D52"/>
+    <path d="M279 720H326V760H279V720Z" fill="#DD2D52"/>
+  </g>
+</svg>

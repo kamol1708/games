@@ -1,0 +1,910 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  html {
+    font-size: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background:
+      radial-gradient(900px 500px at 12% 8%, rgba(121, 79, 255, 0.16), transparent 58%),
+      radial-gradient(900px 500px at 88% 10%, rgba(49, 123, 255, 0.14), transparent 60%),
+      #05060a;
+    color: rgb(237 239 245);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply border border-white/10 bg-white/5 backdrop-blur-xl shadow-glow;
+  }
+
+  .section-divider {
+    @apply h-px w-full bg-divider-line opacity-70;
+  }
+
+  .noise-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image:
+      radial-gradient(circle at 20% 20%, #fff 0.6px, transparent 0.8px),
+      radial-gradient(circle at 80% 30%, #fff 0.5px, transparent 0.9px),
+      radial-gradient(circle at 50% 80%, #fff 0.6px, transparent 0.8px);
+    background-size: 12px 12px, 14px 14px, 16px 16px;
+  }
+
+  .shine-button {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .shine-button::after {
+    content: '';
+    position: absolute;
+    inset: -40% auto -40% -20%;
+    width: 44%;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.38),
+      rgba(255, 255, 255, 0)
+    );
+    transform: translateX(-160%) skewX(-20deg);
+    pointer-events: none;
+  }
+
+  .shine-button:hover::after {
+    animation: shine-sweep 900ms ease;
+  }
+
+  .logo-marquee-shell {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.5rem;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .logo-marquee-track {
+    display: flex;
+    width: max-content;
+    gap: 0.5rem;
+    animation: logo-marquee 18s linear infinite;
+  }
+
+  .logo-pill {
+    display: grid;
+    place-items: center;
+    min-width: 11rem;
+    height: 3rem;
+    padding: 0 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .hero-title-line {
+    display: block;
+    line-height: 1.14;
+    background-image: linear-gradient(90deg, #fb7185, #60a5fa, #fb7185);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 220% 100%;
+    background-position: 0% 50%;
+    animation: hero-rb-shift 1.6s linear infinite;
+  }
+}
+
+@keyframes shine-sweep {
+  from {
+    transform: translateX(-160%) skewX(-20deg);
+  }
+  to {
+    transform: translateX(320%) skewX(-20deg);
+  }
+}
+
+@keyframes logo-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 0.25rem));
+  }
+}
+
+@keyframes hero-rb-shift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 220% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+  }
+
+  .shine-button:hover::after {
+    animation: none;
+  }
+
+  .logo-marquee-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .logo-pill {
+    min-width: min(11rem, calc(50% - 0.25rem));
+  }
+
+  .hero-title-line {
+    animation: none;
+  }
+}
+
+@layer components {
+  /* Premium dark skin for existing game pages (design-only overrides) */
+  :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page) {
+    position: relative;
+    min-height: 100vh;
+    color: rgb(237 239 245) !important;
+    background:
+      radial-gradient(900px 520px at 10% 4%, rgba(124, 58, 237, 0.16), transparent 58%),
+      radial-gradient(800px 480px at 88% 8%, rgba(59, 130, 246, 0.14), transparent 60%),
+      radial-gradient(700px 420px at 52% 96%, rgba(34, 211, 238, 0.08), transparent 58%),
+      #05060a !important;
+  }
+
+  :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page)::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image:
+      radial-gradient(circle at 20% 20%, #fff 0.6px, transparent 0.8px),
+      radial-gradient(circle at 80% 30%, #fff 0.55px, transparent 0.85px),
+      radial-gradient(circle at 50% 70%, #fff 0.6px, transparent 0.8px);
+    background-size: 12px 12px, 15px 15px, 18px 18px;
+    z-index: 0;
+  }
+
+  :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page) > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  :is(
+      .qb-shell, .mr-shell, .th-shell, .wof-shell, .ws-shell,
+      .fr-game-shell, .fpr-game-shell,
+      .fr-setup-card, .fr-finish-card, .fpr-setup-card, .fpr-finish-card,
+      .tow-card, .tb-side, .tb-center, .tb-modal,
+      .lp-hero, .lp-features, .lp-favorites,
+      .fc2-field-wrap, .fc2-panel
+    ) {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgb(237 239 245) !important;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 18px 60px rgba(2, 8, 23, 0.45) !important;
+  }
+
+  :is(.qb-head, .mr-head, .th-head, .wof-head, .ws-head, .tb-topbar, .fc2-header) {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: rgb(237 239 245) !important;
+    backdrop-filter: blur(12px);
+  }
+
+  :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page)
+    :is(h1, h2, h3, h4, h5, h6) {
+    color: rgb(249 250 251) !important;
+  }
+
+  :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page)
+    :is(p, small, label, span, li, strong) {
+    color: inherit;
+  }
+
+  :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page)
+    :is(input, select, textarea) {
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgb(243 244 246) !important;
+    box-shadow: none !important;
+  }
+
+  :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page)
+    :is(input, select, textarea)::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page)
+    button {
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: rgb(243 244 246) !important;
+    box-shadow: 0 10px 24px rgba(2, 8, 23, 0.24);
+    transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease;
+  }
+
+  :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page)
+    button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+  }
+
+  :is(.qb-start, .mr-start, .th-back, .th-next, .wof-start, .wof-spin, .wof-back, .wof-reset,
+      .ws-back, .ws-reset, .fr-start, .fr-next, .fr-back, .fpr-start, .fpr-next, .fpr-back,
+      .tow-start, .tb-key-go, .lp-btn-primary, .fc2-back, .fc2-sound) {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(59, 130, 246, 0.9)) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    color: #fff !important;
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.28) !important;
+  }
+
+  :is(.qb-options button, .th-options button, .wof-judge button, .ws-word-btn, .fr-option, .fpr-option, .fc2-option-btn) {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: rgb(237 239 245) !important;
+  }
+
+  :is(.qb-team-box, .qb-question-card, .mr-stats, .mr-tools, .mr-levels, .th-card, .th-sidecard,
+      .wof-scoreboard, .wof-history, .ws-board, .ws-score, .ws-team-score,
+      .fr-scoreboard, .fr-team-card, .fpr-scoreboard, .fpr-team-card,
+      .tow-info-box, .tow-team-box, .tb-question, .tb-answer) {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: rgb(237 239 245) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  }
+
+  :is(.qb-muted, .mr-muted, .th-message, .wof-muted, .ws-tip, .fr-error, .fpr-error, .tow-error, .fc2-header p) {
+    color: rgba(255, 255, 255, 0.68) !important;
+  }
+
+  /* keep playfields/boards legible but polish borders */
+  :is(.fc2-field, .th-map, .wof-wheel-card, .tb-arena) {
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 14px 36px rgba(2, 8, 23, 0.35) !important;
+  }
+
+  /* progress bars / chips */
+  :is(.th-progress-line, .mr-progress-track, .qb-progress-track, .ws-progress-track) {
+    background: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  :is(.th-progress-fill, .mr-progress-fill, .qb-progress-fill, .ws-progress-fill) {
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.95), rgba(59, 130, 246, 0.95)) !important;
+  }
+
+  @media (max-width: 768px) {
+    :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page) {
+      padding-inline: 12px !important;
+    }
+  }
+
+  /* Contrast fixes: ensure text stays readable on dark surfaces */
+  :is(
+      .qb-shell, .mr-shell, .th-shell, .wof-shell, .ws-shell,
+      .fr-game-shell, .fpr-game-shell, .fr-setup-card, .fr-finish-card, .fpr-setup-card, .fpr-finish-card,
+      .tow-card, .tb-side, .tb-center, .tb-modal, .tb-topbar,
+      .lp-hero, .lp-features, .lp-favorites, .fc2-header, .fc2-field-wrap, .fc2-panel
+    )
+    :is(h1, h2, h3, h4, h5, h6, strong, b) {
+    color: rgb(249 250 251) !important;
+  }
+
+  :is(
+      .qb-shell, .mr-shell, .th-shell, .wof-shell, .ws-shell,
+      .fr-game-shell, .fpr-game-shell, .fr-setup-card, .fr-finish-card, .fpr-setup-card, .fpr-finish-card,
+      .tow-card, .tb-side, .tb-center, .tb-modal, .tb-topbar,
+      .lp-hero, .lp-features, .lp-favorites, .fc2-header, .fc2-field-wrap, .fc2-panel
+    )
+    :is(p, span, small, label, li, dd, dt) {
+    color: rgba(255, 255, 255, 0.84) !important;
+  }
+
+  :is(.qb-team-box small, .qb-lead, .qb-message, .qb-question-card.idle p,
+      .mr-lead, .mr-head p, .mr-muted,
+      .th-message, .th-card p, .th-sidecard p,
+      .wof-muted, .wof-setup p, .wof-qmeta,
+      .ws-tip,
+      .fr-error, .fpr-error,
+      .tow-about > p, .tow-question-list, .tow-summary p, .tow-info-box p,
+      .fc2-header p, .fc2-block p, .fc2-message) {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Inputs/selects keep readable text and dropdown arrows */
+  :is(.qb-page, .mr-page, .th-page, .wof-page, .ws-page, .fr-page, .fpr-page, .tb-page, .tow-page, .lp-page, .fc2-page)
+    :is(input, select, textarea) {
+    color-scheme: dark;
+    caret-color: #fff;
+  }
+
+  /* Generic chips / tags / badges */
+  :is(.qb-tag, .th-map-chip, .wof-turn-tag, .tb-pill, .chip, .lp-pill, .lp-pill-small,
+      .fr-points, .fpr-points, .ws-team-score, .ws-score) {
+    color: rgb(243 244 246) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+  }
+
+  /* Keep semantic statuses vivid */
+  :is(.qb-tag.easy, .correct, .is-correct, .success, .tb-side-correct, .th-option-correct) {
+    color: #86efac !important;
+  }
+  :is(.qb-tag.medium, .warning, .tb-result) {
+    color: #fde68a !important;
+  }
+  :is(.qb-tag.hard, .wrong, .is-wrong, .error, .tow-error, .wof-error, .fr-error, .fpr-error, .th-option-wrong) {
+    color: #fca5a5 !important;
+  }
+
+  /* Buttons with bright backgrounds need dark text */
+  :is(.lp-btn-primary, .lp-game-btn, .th-start, .qb-start) {
+    color: #111827 !important;
+  }
+
+  /* Specific game elements that often keep old dark text */
+  :is(.wof-student-pick, .wof-qtext, .wof-qmeta, .wof-turn-tag, .wof-scoreboard li, .wof-history li,
+      .th-lead, .th-result h2, .th-result p, .th-result-stats span,
+      .fc2-hud span, .fc2-defender small,
+      .tow-warning, .tow-actions-head span, .tow-summary span, .tow-info-box span) {
+    color: rgba(255, 255, 255, 0.86) !important;
+  }
+
+  :is(.th-sidecard strong, .th-result strong) {
+    color: #fcd34d !important;
+  }
+
+  /* Preserve team accent pills */
+  .tb-pill-blue {
+    color: #bfdbfe !important;
+  }
+  .tb-pill-red {
+    color: #fecaca !important;
+  }
+  .ws-team-score.team-a {
+    color: #bfdbfe !important;
+  }
+  .ws-team-score.team-b {
+    color: #fecaca !important;
+  }
+
+  /* Active/selected controls need visible contrast */
+  :is(.tow-levels button.active, .tow-op.active, .lp-category-chip.active, .qb-card.selected, .qb-team-box.active) {
+    color: #fff !important;
+    border-color: rgba(99, 102, 241, 0.55) !important;
+    box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.3) inset, 0 10px 24px rgba(79, 70, 229, 0.2) !important;
+  }
+
+  /* ===== Per-game premium polish (design only) ===== */
+
+  /* Quiz Battle */
+  .qb-page {
+    background:
+      radial-gradient(720px 420px at 12% 10%, rgba(236, 72, 153, 0.12), transparent 60%),
+      radial-gradient(780px 480px at 92% 8%, rgba(99, 102, 241, 0.14), transparent 62%),
+      #05060a !important;
+  }
+  .qb-shell {
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.72), rgba(15, 23, 42, 0.6)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+  .qb-card,
+  .qb-panel,
+  .qb-center-meta,
+  .qb-team-box,
+  .qb-question-card {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.035)) !important;
+  }
+  .qb-card-front small {
+    color: #c4b5fd !important;
+  }
+  .qb-progress {
+    background: rgba(255, 255, 255, 0.08) !important;
+  }
+  .qb-progress i {
+    background: linear-gradient(90deg, #a78bfa, #60a5fa) !important;
+  }
+  .qb-options button {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-color: rgba(129, 140, 248, 0.28) !important;
+  }
+  .qb-options button:hover:not(:disabled) {
+    background: rgba(99, 102, 241, 0.24) !important;
+  }
+
+  /* Treasure Hunt */
+  .th-page {
+    background:
+      radial-gradient(760px 420px at 10% 8%, rgba(251, 191, 36, 0.14), transparent 60%),
+      radial-gradient(680px 420px at 92% 10%, rgba(249, 115, 22, 0.12), transparent 60%),
+      #05060a !important;
+  }
+  .th-shell,
+  .th-card,
+  .th-sidecard,
+  .th-result {
+    background: linear-gradient(180deg, rgba(24, 20, 10, 0.66), rgba(17, 14, 8, 0.58)) !important;
+    border: 1px solid rgba(251, 191, 36, 0.14) !important;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.42), inset 0 0 0 1px rgba(255, 255, 255, 0.02) !important;
+  }
+  .th-map,
+  .th-result-map {
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 16px 42px rgba(2, 8, 23, 0.4) !important;
+  }
+  .th-map-overlay {
+    background: linear-gradient(180deg, rgba(5, 6, 10, 0.08), rgba(5, 6, 10, 0.45)) !important;
+  }
+  .th-map-chip,
+  .th-coins {
+    background: rgba(255, 255, 255, 0.07) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+  }
+  .th-options button {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  .th-options button.is-answer {
+    border-color: rgba(250, 204, 21, 0.55) !important;
+    box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.25) inset !important;
+  }
+  .th-options button.is-correct {
+    background: rgba(22, 163, 74, 0.18) !important;
+    border-color: rgba(74, 222, 128, 0.4) !important;
+  }
+  .th-options button.is-wrong {
+    background: rgba(220, 38, 38, 0.14) !important;
+    border-color: rgba(252, 165, 165, 0.35) !important;
+  }
+
+  /* Memory Rush */
+  .mr-page {
+    background:
+      radial-gradient(760px 420px at 12% 8%, rgba(56, 189, 248, 0.13), transparent 62%),
+      radial-gradient(740px 450px at 90% 12%, rgba(168, 85, 247, 0.12), transparent 64%),
+      #05060a !important;
+  }
+  .mr-shell {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.58)) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  .mr-stats,
+  .mr-tools,
+  .mr-levels,
+  .mr-result {
+    background: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  .mr-card {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 18px rgba(2, 8, 23, 0.25) !important;
+  }
+  .mr-card:not(.open) {
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.16)) !important;
+  }
+  .mr-card.open {
+    background: rgba(255, 255, 255, 0.08) !important;
+  }
+  .mr-levels button.active {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.9), rgba(99, 102, 241, 0.9)) !important;
+    color: white !important;
+  }
+
+  /* Wheel of Fortune */
+  .wof-page {
+    background:
+      radial-gradient(700px 400px at 12% 8%, rgba(14, 165, 233, 0.12), transparent 60%),
+      radial-gradient(700px 420px at 88% 10%, rgba(249, 115, 22, 0.1), transparent 62%),
+      #05060a !important;
+  }
+  .wof-shell {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(17, 24, 39, 0.62)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+  .wof-wheel-card,
+  .wof-scoreboard,
+  .wof-history,
+  .wof-setup {
+    background: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  .wof-scoreboard li,
+  .wof-history li {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+  .wof-wheel {
+    box-shadow:
+      0 16px 40px rgba(2, 8, 23, 0.35),
+      inset 0 0 0 2px rgba(255, 255, 255, 0.12) !important;
+  }
+  .wof-turn-tag {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* Word Search */
+  .ws-page {
+    background:
+      radial-gradient(700px 420px at 8% 10%, rgba(99, 102, 241, 0.12), transparent 60%),
+      radial-gradient(720px 420px at 92% 8%, rgba(16, 185, 129, 0.1), transparent 62%),
+      #05060a !important;
+  }
+  .ws-shell {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.58)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+  .ws-score,
+  .ws-board,
+  .ws-sidebar {
+    background: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  .ws-grid {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-radius: 14px;
+    padding: 6px;
+  }
+  .ws-cell {
+    background: rgba(255, 255, 255, 0.045) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #111827 !important;
+  }
+  .ws-cell.is-selected {
+    background: rgba(74, 222, 128, 0.5) !important;
+    border-color: rgba(34, 197, 94, 0.65) !important;
+    color: #000000 !important;
+  }
+  .ws-cell.done {
+    background: rgba(34, 197, 94, 0.18) !important;
+    border-color: rgba(134, 239, 172, 0.32) !important;
+  }
+  .ws-cell.is-team-a,
+  .ws-cell.is-team-b {
+    background: rgba(239, 68, 68, 0.72) !important;
+    border-color: rgba(248, 113, 113, 0.9) !important;
+    color: #000000 !important;
+  }
+
+  /* Flag Race + Flag Player Race */
+  :is(.fr-page, .fpr-page) {
+    background:
+      radial-gradient(760px 420px at 10% 8%, rgba(59, 130, 246, 0.12), transparent 62%),
+      radial-gradient(760px 420px at 90% 10%, rgba(236, 72, 153, 0.1), transparent 64%),
+      #05060a !important;
+  }
+  :is(.fr-game-shell, .fpr-game-shell, .fr-setup-card, .fr-finish-card, .fpr-setup-card, .fpr-finish-card) {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(17, 24, 39, 0.58)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+  :is(.fr-score-table, .fpr-score-table) {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+  }
+  :is(.fr-round-box, .fpr-round-box, .fr-team-card, .fpr-team-card, .fr-flag-stage, .fpr-flag-stage) {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.045) !important;
+  }
+  :is(.fr-options button, .fpr-options button) {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  :is(.fr-options button:disabled, .fpr-options button:disabled) {
+    opacity: 0.7 !important;
+  }
+  :is(.fr-flag, .fpr-flag) {
+    box-shadow: 0 14px 34px rgba(2, 8, 23, 0.28) !important;
+  }
+
+  /* Tug setup page */
+  .tow-page {
+    background:
+      radial-gradient(720px 420px at 10% 8%, rgba(14, 165, 233, 0.11), transparent 62%),
+      radial-gradient(700px 420px at 90% 12%, rgba(59, 130, 246, 0.1), transparent 64%),
+      #05060a !important;
+  }
+  .tow-card,
+  .tow-info-box,
+  .tow-team-box,
+  .tow-summary {
+    background: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 16px 44px rgba(2, 8, 23, 0.35) !important;
+  }
+  .tow-op {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  .tow-levels button {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+  .tow-warning {
+    background: rgba(251, 191, 36, 0.14) !important;
+    border: 1px solid rgba(251, 191, 36, 0.24) !important;
+  }
+
+  /* Tug battle page */
+  .tb-page {
+    background:
+      radial-gradient(760px 420px at 12% 8%, rgba(59, 130, 246, 0.14), transparent 62%),
+      radial-gradient(760px 420px at 88% 10%, rgba(239, 68, 68, 0.12), transparent 64%),
+      #05060a !important;
+  }
+  .tb-topbar,
+  .tb-side,
+  .tb-center,
+  .tb-modal {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  .tb-question-blue {
+    background: rgba(59, 130, 246, 0.14) !important;
+    border-color: rgba(147, 197, 253, 0.22) !important;
+  }
+  .tb-question-red {
+    background: rgba(239, 68, 68, 0.12) !important;
+    border-color: rgba(252, 165, 165, 0.22) !important;
+  }
+  .tb-answer {
+    color: #f8fafc !important;
+  }
+  .tb-key {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  .tb-key-go {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.85), rgba(16, 185, 129, 0.85)) !important;
+  }
+
+  /* Football Challenge */
+  .fc2-page {
+    background:
+      radial-gradient(760px 420px at 10% 8%, rgba(34, 197, 94, 0.12), transparent 60%),
+      radial-gradient(740px 420px at 90% 10%, rgba(59, 130, 246, 0.12), transparent 62%),
+      #05060a !important;
+  }
+  .fc2-header,
+  .fc2-field-wrap,
+  .fc2-panel {
+    background: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 18px 54px rgba(2, 8, 23, 0.38) !important;
+  }
+  .fc2-hud span,
+  .fc2-message,
+  .fc2-question {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 8px 12px;
+  }
+  .fc2-field {
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 14px 30px rgba(2, 8, 23, 0.28) !important;
+  }
+  .fc2-btn,
+  .fc2-option {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #f8fafc !important;
+  }
+  .fc2-btn:not(.fc2-btn-ghost),
+  .fc2-back,
+  .fc2-sound {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(16, 185, 129, 0.85)) !important;
+  }
+  .fc2-prize {
+    background: rgba(250, 204, 21, 0.12) !important;
+    border: 1px solid rgba(250, 204, 21, 0.24) !important;
+    color: #fde68a !important;
+  }
+
+  /* Learning hub premium conversion */
+  .lp-page {
+    background:
+      radial-gradient(760px 420px at 12% 8%, rgba(236, 72, 153, 0.1), transparent 60%),
+      radial-gradient(760px 440px at 88% 10%, rgba(99, 102, 241, 0.12), transparent 64%),
+      #05060a !important;
+    color: #f8fafc !important;
+  }
+  .lp-layer {
+    opacity: 0.32;
+    filter: saturate(0.75);
+  }
+  .lp-hero,
+  .lp-features,
+  .lp-favorites,
+  .lp-feature-card,
+  .lp-game-card,
+  .lp-stat {
+    background: rgba(255, 255, 255, 0.045) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 18px 54px rgba(2, 8, 23, 0.36) !important;
+    color: #f8fafc !important;
+  }
+  .lp-subtitle,
+  .lp-features-subtitle,
+  .lp-favorites-subtitle,
+  .lp-feature-card p,
+  .lp-game-card p,
+  .lp-stat span {
+    color: rgba(255, 255, 255, 0.72) !important;
+  }
+  .lp-pill,
+  .lp-pill-small,
+  .lp-category-chip {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+  .lp-feature-icon.blue,
+  .lp-feature-icon.pink,
+  .lp-feature-icon.purple,
+  .lp-feature-icon.green,
+  .lp-game-preview {
+    filter: saturate(0.9) brightness(0.92);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Final hard override for Word Search text visibility */
+  .ws-page .ws-cell,
+  .ws-page button.ws-cell {
+    color: #000000 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+  .ws-page .ws-cell.is-selected,
+  .ws-page button.ws-cell.is-selected {
+    background: #86efac !important;
+    border-color: #22c55e !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+  .ws-page .ws-cell.is-team-a,
+  .ws-page .ws-cell.is-team-b,
+  .ws-page button.ws-cell.is-team-a,
+  .ws-page button.ws-cell.is-team-b {
+    background: #ef4444 !important;
+    border-color: #dc2626 !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+  .ws-page .ws-sidebar li {
+    color: #111827 !important;
+    opacity: 1 !important;
+  }
+  .ws-page .ws-sidebar li.done.team-a,
+  .ws-page .ws-sidebar li.done.team-b {
+    color: #ffffff !important;
+  }
+}
+
+@keyframes bumbuzzle-choice-in {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.bumbuzzle-choice-in {
+  opacity: 0;
+  animation: bumbuzzle-choice-in 0.34s ease-out forwards;
+}
+
+@keyframes teacher-admin-modal-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Word Search result modal contrast fix (premium overrides can wash out light modal) */
+.ws-modal-overlay {
+  background: rgba(2, 6, 16, 0.72) !important;
+}
+
+.ws-modal {
+  background: #ffffff !important;
+  border: 1px solid #d6e3f0 !important;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.28) !important;
+  color: #0f172a !important;
+}
+
+.ws-modal .ws-modal-tag {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+.ws-modal h2 {
+  color: #0f172a !important;
+  opacity: 1 !important;
+}
+
+.ws-modal .ws-modal-text {
+  color: #475569 !important;
+  opacity: 1 !important;
+}
+
+.ws-modal .ws-modal-score {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1e3a8a !important;
+  opacity: 1 !important;
+}
+
+.ws-modal .ws-modal-actions {
+  opacity: 1 !important;
+}
+
+.ws-modal .ws-reset,
+.ws-modal .ws-back {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}

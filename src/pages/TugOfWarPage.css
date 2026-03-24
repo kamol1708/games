@@ -1,0 +1,458 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@500;600;700;800&display=swap');
+
+.tow-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #edf3f8 0%, #e8f0f6 100%);
+  padding: 22px;
+  font-family: 'Nunito Sans', sans-serif;
+  color: #22344a;
+}
+
+.tow-layout {
+  width: 100%;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1.18fr;
+  gap: 26px;
+}
+
+.tow-card {
+  background: #f5f8fb;
+  border: 1px solid #d7e1ea;
+  border-radius: 26px;
+  padding: 26px 28px;
+  box-shadow: 0 3px 0 rgba(182, 196, 210, 0.15), 0 10px 20px rgba(139, 162, 182, 0.14);
+}
+
+.tow-card h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.3vw, 2.2rem);
+  line-height: 1.1;
+}
+
+.tow-about > p {
+  margin: 14px 0 0;
+  font-size: clamp(1rem, 1.3vw, 1.8rem);
+  color: #445975;
+  line-height: 1.45;
+}
+
+.tow-warning {
+  margin-top: 14px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 2px solid #efca82;
+  background: #f8f3e6;
+  color: #b65f00;
+  font-weight: 700;
+}
+
+.tow-about ol {
+  margin: 18px 0 0;
+  padding-left: 22px;
+  color: #3f526d;
+  font-size: clamp(1.05rem, 1.4vw, 1.8rem);
+  line-height: 1.55;
+}
+
+.tow-info-box,
+.tow-team-box {
+  margin-top: 16px;
+  border: 1px solid #d7e1ea;
+  border-radius: 22px;
+  background: #f1f5f9;
+  padding: 16px 20px;
+}
+
+.tow-info-box span {
+  display: block;
+  color: #8093aa;
+  font-size: 0.95rem;
+  letter-spacing: 1.1px;
+  font-weight: 700;
+}
+
+.tow-info-box strong {
+  display: block;
+  margin-top: 4px;
+  font-size: clamp(2rem, 2.8vw, 3rem);
+  line-height: 1;
+}
+
+.tow-info-box p {
+  margin: 6px 0 0;
+  color: #5c6f83;
+  font-size: clamp(0.95rem, 1.1vw, 1.3rem);
+}
+
+.tow-team-box h3 {
+  margin: 0;
+  font-size: clamp(1.25rem, 1.6vw, 1.7rem);
+}
+
+.tow-question-list {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  max-height: 210px;
+  overflow: auto;
+  color: #3f526d;
+  font-size: clamp(0.95rem, 1.15vw, 1.2rem);
+  line-height: 1.55;
+}
+
+.tow-teams {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tow-teams input {
+  width: 100%;
+  height: 58px;
+  border-radius: 18px;
+  border: 1px solid #ccd8e4;
+  background: #f7fbff;
+  color: #2a3f58;
+  font-size: clamp(1rem, 1.3vw, 1.5rem);
+  padding: 0 16px;
+}
+
+.tow-teams input:focus {
+  outline: 2px solid #2aa6ea;
+  border-color: #2aa6ea;
+}
+
+.tow-start {
+  margin-top: 18px;
+  width: 100%;
+  height: 64px;
+  border: none;
+  border-radius: 18px;
+  background: linear-gradient(90deg, #0f93db, #127ec6);
+  color: #fff;
+  font-size: clamp(1.05rem, 1.5vw, 1.5rem);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.tow-error {
+  margin: 12px 0 0;
+  color: #c54232;
+  font-weight: 700;
+}
+
+.tow-start:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.tow-actions-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.tow-actions-head span {
+  color: #8096b1;
+  font-size: clamp(1rem, 1.2vw, 1.4rem);
+  font-weight: 700;
+}
+
+.tow-ops-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.tow-op {
+  height: 102px;
+  border-radius: 22px;
+  border: 2px solid #d7e1ea;
+  background: #f4f7fa;
+  color: #31455e;
+  font-size: clamp(1.05rem, 1.5vw, 1.8rem);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 18px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.tow-op i {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: #f0f2f5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  font-size: 2rem;
+}
+
+.tow-op.active {
+  border-color: #21a4ea;
+  box-shadow: 0 10px 16px rgba(33, 164, 234, 0.15);
+}
+
+.tow-op.active i {
+  background: #1da8ed;
+  color: #fff;
+}
+
+.tow-op:hover {
+  transform: translateY(-3px);
+}
+
+.tow-level-title {
+  margin: 22px 0 12px;
+  font-size: clamp(1.25rem, 1.6vw, 1.7rem);
+}
+
+.tow-levels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tow-levels button {
+  height: 54px;
+  border: none;
+  border-radius: 999px;
+  background: #e2e8ee;
+  color: #3a4e66;
+  font-size: clamp(1rem, 1.2vw, 1.35rem);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.tow-levels button.active {
+  background: #1ea4e7;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(30, 164, 231, 0.28);
+}
+
+.tow-levels button:hover {
+  transform: translateY(-2px);
+}
+
+.tow-summary {
+  margin-top: 16px;
+  border: 1px solid #d7e1ea;
+  border-radius: 20px;
+  background: #f1f5f8;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tow-summary span {
+  display: block;
+  color: #8093aa;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.tow-summary strong {
+  display: block;
+  margin-top: 4px;
+  font-size: clamp(1.2rem, 1.8vw, 2rem);
+}
+
+.tow-summary p {
+  margin: 4px 0 0;
+  color: #5b6f84;
+  font-size: clamp(1rem, 1.2vw, 1.35rem);
+}
+
+.tow-count {
+  text-align: right;
+}
+
+.tow-count strong {
+  font-size: clamp(2rem, 2.6vw, 3rem);
+  line-height: 1;
+}
+
+.tow-ai-box {
+  margin-top: 16px;
+  border: 1px solid #16466f;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #1f5f92 0%, #163f63 100%);
+  padding: 16px;
+  color: #e9f4ff;
+}
+
+.tow-ai-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tow-ai-head h3 {
+  margin: 0;
+  font-size: clamp(1.1rem, 1.4vw, 1.45rem);
+  color: #ffffff;
+}
+
+.tow-ai-head span {
+  border-radius: 999px;
+  background: #ffe39a;
+  color: #6d4300;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.tow-ai-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tow-ai-grid label {
+  display: grid;
+  gap: 6px;
+  color: #d7e8f8;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.tow-ai-grid select {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #8fb7da;
+  background: #ffffff;
+  color: #12324d;
+  font-size: 1rem;
+  padding: 0 12px;
+}
+
+.tow-ai-levels {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tow-ai-levels button {
+  height: 42px;
+  border: 1px solid #7eaad0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #eaf4ff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tow-ai-levels button.active {
+  background: #ffd166;
+  color: #533300;
+  border-color: #ffd166;
+}
+
+.tow-ai-actions {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tow-ai-actions button {
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tow-ai-actions button:first-child {
+  background: linear-gradient(90deg, #ffd166, #ffbc42);
+  color: #412600;
+}
+
+.tow-ai-actions button:first-child:hover:not(:disabled) {
+  filter: brightness(1.04);
+}
+
+.tow-ai-actions button:last-child:hover:not(:disabled) {
+  filter: brightness(1.04);
+}
+
+.tow-ai-actions button:last-child {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid #88b2d6;
+  color: #fff;
+}
+
+.tow-ai-actions button:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.tow-ai-info,
+.tow-ai-error {
+  margin: 10px 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.tow-ai-info {
+  color: #1f7f4d;
+}
+
+.tow-ai-error {
+  color: #c54232;
+}
+
+@media (max-width: 1024px) {
+  .tow-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .tow-page {
+    padding: 14px;
+  }
+
+  .tow-card {
+    padding: 18px 16px;
+    border-radius: 18px;
+  }
+
+  .tow-ops-grid,
+  .tow-teams,
+  .tow-levels,
+  .tow-ai-grid,
+  .tow-ai-levels,
+  .tow-ai-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .tow-op {
+    height: 84px;
+  }
+
+  .tow-summary {
+    flex-direction: column;
+  }
+
+  .tow-count {
+    text-align: left;
+  }
+}

@@ -1,0 +1,570 @@
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Montserrat:wght@500;600;700;800;900&display=swap');
+
+.fcx-page {
+  min-height: 100vh;
+  padding: 20px 14px 34px;
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(122, 255, 170, 0.16) 0%, transparent 26%),
+    radial-gradient(circle at top right, rgba(113, 204, 255, 0.14) 0%, transparent 24%),
+    linear-gradient(180deg, #08151d 0%, #0b2522 100%);
+}
+
+.fcx-shell {
+  width: min(1360px, 100%);
+  margin: 0 auto;
+}
+
+.fcx-header {
+  margin-bottom: 18px;
+}
+
+.fcx-topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fcx-back,
+.fcx-sound,
+.fcx-main-btn,
+.fcx-ghost-btn,
+.fcx-option {
+  cursor: pointer;
+  transition: transform 0.18s ease, filter 0.18s ease, background 0.18s ease;
+}
+
+.fcx-back,
+.fcx-sound,
+.fcx-ghost-btn {
+  min-height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  padding: 0 18px;
+  font-weight: 800;
+}
+
+.fcx-back:hover,
+.fcx-sound:hover,
+.fcx-ghost-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.fcx-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.fcx-kicker,
+.fcx-card-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(186, 244, 214, 0.7);
+}
+
+.fcx-heading h1 {
+  margin: 8px 0;
+  font-family: 'Black Ops One', system-ui;
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 0.98;
+}
+
+.fcx-subtitle {
+  margin: 0;
+  max-width: 620px;
+  color: rgba(237, 248, 255, 0.8);
+}
+
+.fcx-scoreline {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.fcx-pill {
+  min-width: 126px;
+  padding: 14px 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.fcx-pill span {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.fcx-pill strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.2rem;
+}
+
+.fcx-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(360px, 0.84fr);
+  gap: 18px;
+}
+
+.fcx-field-wrap,
+.fcx-panel {
+  border-radius: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.25);
+}
+
+.fcx-field-wrap {
+  padding: 18px;
+}
+
+.fcx-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.fcx-progress-bar {
+  flex: 1;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.fcx-progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6dffab, #ffe866);
+}
+
+.fcx-progress strong {
+  font-size: 0.92rem;
+}
+
+.fcx-field {
+  position: relative;
+  overflow: hidden;
+  height: 620px;
+  border-radius: 28px;
+  border: 2px solid rgba(167, 255, 183, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 20%),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 60px, rgba(255, 255, 255, 0.015) 60px 120px),
+    linear-gradient(180deg, #1b7d45 0%, #10683a 46%, #0d532f 100%);
+}
+
+.fcx-field::before {
+  content: '';
+  position: absolute;
+  inset: 8% 8% 11%;
+  border: 3px solid rgba(255, 255, 255, 0.18);
+  border-top: 0;
+  border-radius: 0 0 24px 24px;
+}
+
+.fcx-crowd {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background:
+    radial-gradient(circle at 16px 24px, rgba(255, 236, 143, 0.28) 0 4px, transparent 4px),
+    radial-gradient(circle at 42px 18px, rgba(255, 255, 255, 0.24) 0 3px, transparent 3px),
+    radial-gradient(circle at 72px 27px, rgba(255, 144, 144, 0.28) 0 4px, transparent 4px),
+    linear-gradient(180deg, rgba(8, 14, 22, 0.8), rgba(8, 14, 22, 0.18));
+  background-size: 88px 52px, 88px 52px, 88px 52px, auto;
+}
+
+.fcx-crowd.top {
+  top: 0;
+}
+
+.fcx-goal-area {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 360px;
+  height: 170px;
+  transform: translateX(-50%);
+}
+
+.fcx-goal-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 8px solid #f8fcff;
+  border-bottom-width: 16px;
+  border-radius: 12px 12px 20px 20px;
+  box-shadow: inset 0 0 0 1px #d5eaf3;
+}
+
+.fcx-goal-area::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.28) 0 1px, transparent 1px 16px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.22) 0 1px, transparent 1px 16px);
+}
+
+.fcx-goal-target {
+  position: absolute;
+  top: 14px;
+  bottom: 28px;
+  width: calc(33.333% - 10px);
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-family: 'Black Ops One', system-ui;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.03);
+  z-index: 1;
+}
+
+.fcx-goal-target:nth-child(1) {
+  left: 8px;
+}
+
+.fcx-goal-target:nth-child(2) {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.fcx-goal-target:nth-child(3) {
+  right: 8px;
+}
+
+.fcx-goal-target.open {
+  background: linear-gradient(180deg, rgba(109, 255, 171, 0.42), rgba(109, 255, 171, 0.15));
+  color: #f3fff7;
+  box-shadow: 0 0 0 2px rgba(109, 255, 171, 0.34);
+}
+
+.fcx-keeper {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 35% 30%, #ffdca5 0%, #ff9f1c 100%);
+  border: 3px solid rgba(255, 245, 205, 0.95);
+  font-size: 1.55rem;
+  transform: translateX(-50%);
+  z-index: 2;
+  transition: transform 0.35s ease, left 0.35s ease;
+}
+
+.fcx-keeper.shift-left {
+  left: 39%;
+}
+
+.fcx-keeper.shift-right {
+  left: 61%;
+}
+
+.fcx-keeper.dive-left {
+  left: 30%;
+  transform: translateX(-50%) rotate(-18deg);
+}
+
+.fcx-keeper.dive-center {
+  left: 50%;
+  transform: translateX(-50%) scale(1.05);
+}
+
+.fcx-keeper.dive-right {
+  left: 70%;
+  transform: translateX(-50%) rotate(18deg);
+}
+
+.fcx-goal-flash,
+.fcx-save-flash {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-family: 'Black Ops One', system-ui;
+  letter-spacing: 0.08em;
+  z-index: 4;
+}
+
+.fcx-goal-flash {
+  color: #16351d;
+  background: #ffe866;
+  box-shadow: 0 0 0 6px rgba(255, 232, 102, 0.2);
+}
+
+.fcx-save-flash {
+  color: #f8fbff;
+  background: rgba(80, 130, 255, 0.8);
+}
+
+.fcx-field-lines {
+  position: absolute;
+  inset: 28% 14% 16%;
+  border: 3px solid rgba(255, 255, 255, 0.14);
+  border-radius: 30px;
+}
+
+.fcx-player,
+.fcx-ball {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.fcx-player {
+  bottom: 84px;
+  width: 86px;
+  height: 86px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  background: linear-gradient(180deg, #69d4ff, #1888d5);
+  border: 3px solid rgba(223, 247, 255, 0.95);
+  box-shadow: 0 16px 24px rgba(0, 0, 0, 0.22);
+}
+
+.fcx-ball {
+  bottom: 54px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  background: #fff;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+  transition: transform 0.55s cubic-bezier(0.2, 0.75, 0.2, 1), left 0.55s cubic-bezier(0.2, 0.75, 0.2, 1), bottom 0.55s cubic-bezier(0.2, 0.75, 0.2, 1), opacity 0.3s ease;
+}
+
+.fcx-ball.shot-goal.shot-left {
+  left: 31%;
+  bottom: 405px;
+  transform: translateX(-50%) scale(0.56) rotate(-540deg);
+}
+
+.fcx-ball.shot-goal.shot-center {
+  left: 50%;
+  bottom: 425px;
+  transform: translateX(-50%) scale(0.54) rotate(540deg);
+}
+
+.fcx-ball.shot-goal.shot-right {
+  left: 69%;
+  bottom: 405px;
+  transform: translateX(-50%) scale(0.56) rotate(540deg);
+}
+
+.fcx-ball.shot-save.shot-left {
+  left: 34%;
+  bottom: 310px;
+  transform: translateX(-50%) scale(0.7) rotate(-320deg);
+}
+
+.fcx-ball.shot-save.shot-center {
+  left: 50%;
+  bottom: 322px;
+  transform: translateX(-50%) scale(0.72) rotate(320deg);
+}
+
+.fcx-ball.shot-save.shot-right {
+  left: 66%;
+  bottom: 310px;
+  transform: translateX(-50%) scale(0.7) rotate(320deg);
+}
+
+.fcx-panel {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fcx-card {
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 18px;
+}
+
+.fcx-card h2,
+.fcx-card h3 {
+  margin: 8px 0 0;
+  font-family: 'Black Ops One', system-ui;
+  line-height: 1.08;
+}
+
+.fcx-card p {
+  color: rgba(238, 248, 255, 0.82);
+  line-height: 1.65;
+}
+
+.fcx-question {
+  font-weight: 800;
+  color: #fff;
+}
+
+.fcx-rules {
+  margin: 14px 0 18px;
+  padding-left: 18px;
+  color: rgba(238, 248, 255, 0.82);
+  line-height: 1.7;
+}
+
+.fcx-main-btn {
+  min-height: 54px;
+  width: 100%;
+  border-radius: 18px;
+  border: 0;
+  background: linear-gradient(180deg, #ffe760 0%, #ffcf2e 70%, #efb30d 100%);
+  color: #172026;
+  font-family: 'Black Ops One', system-ui;
+  font-size: 1rem;
+}
+
+.fcx-main-btn:hover,
+.fcx-option:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.03);
+}
+
+.fcx-options {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fcx-shoot-options {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.fcx-option {
+  min-height: 54px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 235, 167, 0.25);
+  background: linear-gradient(180deg, #ffe760 0%, #ffcf2e 70%, #efb30d 100%);
+  color: #172026;
+  font-family: 'Black Ops One', system-ui;
+}
+
+.fcx-option.active {
+  box-shadow: 0 0 0 3px rgba(109, 255, 171, 0.3);
+}
+
+.fcx-side-card {
+  margin-top: auto;
+}
+
+.fcx-mini-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0;
+}
+
+.fcx-mini-grid div,
+.fcx-finished-stats div {
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.18);
+  padding: 12px;
+  text-align: center;
+}
+
+.fcx-mini-grid span,
+.fcx-finished-stats span {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.54);
+}
+
+.fcx-mini-grid strong,
+.fcx-finished-stats strong {
+  display: block;
+  margin-top: 8px;
+}
+
+.fcx-ghost-btn {
+  width: 100%;
+}
+
+.fcx-finished {
+  background:
+    radial-gradient(circle at top right, rgba(255, 232, 102, 0.12), transparent 28%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.fcx-finished-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+
+@media (max-width: 1180px) {
+  .fcx-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px) {
+  .fcx-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fcx-scoreline,
+  .fcx-options,
+  .fcx-shoot-options,
+  .fcx-mini-grid,
+  .fcx-finished-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .fcx-field {
+    height: 500px;
+  }
+
+  .fcx-goal-area {
+    width: 280px;
+    height: 140px;
+  }
+
+  .fcx-player {
+    width: 74px;
+    height: 74px;
+  }
+
+  .fcx-ball.shot-goal.shot-left,
+  .fcx-ball.shot-goal.shot-center,
+  .fcx-ball.shot-goal.shot-right {
+    bottom: 320px;
+  }
+}

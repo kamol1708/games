@@ -1,0 +1,299 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@500;700;800&display=swap');
+
+.fpr-page {
+  min-height: 100vh;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 8% 10%, #e5fff4 0%, transparent 34%),
+    radial-gradient(circle at 88% 6%, #e3f3ff 0%, transparent 34%),
+    linear-gradient(180deg, #f8fcff 0%, #edf5ff 100%);
+  font-family: 'Nunito Sans', sans-serif;
+  color: #1d3550;
+}
+
+.fpr-setup-card,
+.fpr-finish-card,
+.fpr-game-shell {
+  max-width: 1220px;
+  margin: 0 auto;
+  border: 1px solid #d5e4f1;
+  border-radius: 24px;
+  background: #fffffff2;
+  box-shadow: 0 14px 30px rgba(71, 105, 141, 0.12);
+}
+
+.fpr-setup-card,
+.fpr-finish-card {
+  max-width: 760px;
+  margin-top: 6vh;
+  padding: 24px;
+}
+
+.fpr-setup-card h1,
+.fpr-finish-card h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+}
+
+.fpr-setup-card p {
+  margin: 10px 0 0;
+  line-height: 1.5;
+  color: #48647f;
+}
+
+.fpr-points {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fpr-points span {
+  font-weight: 800;
+}
+
+.fpr-points strong {
+  border-radius: 999px;
+  background: #e7f0f9;
+  padding: 6px 10px;
+  font-size: 0.95rem;
+}
+
+.fpr-inputs {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fpr-inputs input {
+  border: 1px solid #c7d9e8;
+  border-radius: 14px;
+  height: 52px;
+  padding: 0 14px;
+  font-size: 1rem;
+}
+
+.fpr-inputs input:focus {
+  outline: 2px solid #129769;
+  border-color: #129769;
+}
+
+.fpr-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+}
+
+.fpr-actions button {
+  border: none;
+  border-radius: 12px;
+  height: 46px;
+  padding: 0 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fpr-back {
+  background: #dce7f2;
+  color: #2e4e6c;
+}
+
+.fpr-start {
+  background: linear-gradient(90deg, #11936a, #0f7d5a);
+  color: #fff;
+}
+
+.fpr-error {
+  margin: 10px 0 0;
+  color: #cb3f35;
+  font-weight: 700;
+}
+
+.fpr-game-shell {
+  padding: 16px;
+}
+
+.fpr-top {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.fpr-score-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f4faff;
+  border: 1px solid #d4e3f0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.fpr-score-table th,
+.fpr-score-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #d4e3f0;
+}
+
+.fpr-score-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.fpr-round-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #d4e3f0;
+  border-radius: 16px;
+  background: #f7fbff;
+  padding: 12px 14px;
+}
+
+.fpr-round-box p,
+.fpr-round-box span {
+  margin: 0;
+  font-weight: 700;
+  color: #4d6784;
+}
+
+.fpr-round-box strong {
+  font-size: clamp(1.2rem, 2.6vw, 2rem);
+  color: #0f8c65;
+}
+
+.fpr-flag-stage {
+  margin-top: 12px;
+  border: 1px solid #d4e3f0;
+  border-radius: 18px;
+  background: #f9fcff;
+  padding: 18px;
+  text-align: center;
+}
+
+.fpr-difficulty {
+  margin: 0;
+  font-weight: 800;
+}
+
+.fpr-difficulty.fpr-easy {
+  color: #148e62;
+}
+
+.fpr-difficulty.fpr-medium {
+  color: #cd7f00;
+}
+
+.fpr-difficulty.fpr-hard {
+  color: #bf2e3f;
+}
+
+.fpr-flag {
+  margin-top: 6px;
+  font-size: clamp(4.8rem, 10vw, 8rem);
+  line-height: 1;
+}
+
+.fpr-country {
+  margin: 2px 0 0;
+  font-weight: 800;
+  color: #325274;
+}
+
+.fpr-status {
+  margin: 8px 0 0;
+  color: #45637f;
+  font-weight: 700;
+}
+
+.fpr-team-answers {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.fpr-team-card {
+  border: 1px solid #d4e3f0;
+  border-radius: 16px;
+  background: #f8fcff;
+  padding: 14px;
+}
+
+.fpr-team-card h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+}
+
+.fpr-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fpr-options button {
+  border: none;
+  border-radius: 14px;
+  min-height: 64px;
+  padding: 10px;
+  background: #ddebf7;
+  color: #1e3651;
+  font-weight: 800;
+  font-size: clamp(0.92rem, 1.2vw, 1.05rem);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.fpr-options button:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+.fpr-finish-card {
+  text-align: center;
+}
+
+.fpr-finish-winner {
+  margin: 10px 0 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.fpr-finish-score {
+  margin: 10px 0 0;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 920px) {
+  .fpr-top {
+    grid-template-columns: 1fr;
+  }
+
+  .fpr-team-answers {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .fpr-page {
+    padding: 12px;
+  }
+
+  .fpr-setup-card,
+  .fpr-finish-card,
+  .fpr-game-shell {
+    border-radius: 18px;
+  }
+
+  .fpr-inputs,
+  .fpr-options {
+    grid-template-columns: 1fr;
+  }
+
+  .fpr-round-box {
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    justify-content: center;
+  }
+}
