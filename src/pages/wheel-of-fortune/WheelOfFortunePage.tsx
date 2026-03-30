@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './WheelOfFortunePage.css'
-import { getTeacherItems } from '../../lib/teacherContent'
+import { useTeacherItems } from '../../lib/useTeacherItems'
 
 type QuestionLevel = 'easy' | 'medium' | 'hard'
 
@@ -77,13 +77,14 @@ function WheelOfFortunePage({ onBack }: WheelOfFortunePageProps) {
   const [timerRunning, setTimerRunning] = useState(false)
   const [studentError, setStudentError] = useState('')
   const studentTimeoutRef = useRef<number | null>(null)
+  const teacherItems = useTeacherItems<unknown>('wheel-of-fortune')
 
   const sortedStudentBoard = useMemo(
     () => students.map((name) => ({ name, score: studentScores[name] ?? 0 })).sort((a, b) => b.score - a.score),
     [students, studentScores],
   )
   const allQuestions = useMemo(() => {
-    const teacher = getTeacherItems<unknown>('wheel-of-fortune').filter((item): item is Question => {
+    const teacher = teacherItems.filter((item): item is Question => {
       if (!item || typeof item !== 'object') {
         return false
       }
@@ -96,7 +97,7 @@ function WheelOfFortunePage({ onBack }: WheelOfFortunePageProps) {
       )
     })
     return [...questionBank, ...teacher]
-  }, [])
+  }, [teacherItems])
 
   useEffect(() => {
     if (!timerRunning || timeLeft <= 0) {

@@ -31,6 +31,8 @@ import KimMillionerPage from './pages/kim-millioner/KimMillionerPage'
 import ClassroomTeamQuizPage from './pages/ClassroomTeamQuizPage'
 import MonopolyCalibrationPage from './pages/MonopolyCalibrationPage'
 import FrogPondPage from './pages/frog-pond/FrogPondPage'
+import GameFeedbackDock from './components/GameFeedbackDock'
+import TeacherFeedbackInbox from './components/TeacherFeedbackInbox'
 import TeacherQuestionAdmin from './components/TeacherQuestionAdmin'
 import memoryRushCover from './assets/memoryrush-cover-new.webp'
 import treasureHuntCover from './assets/15-single-default.jpg'
@@ -58,6 +60,14 @@ import {
   registerTeacher,
 } from './lib/localAuth'
 import { getTeacherContentStore, syncAllTeacherContentFromBackend } from './lib/teacherContent'
+import { getGameFeedbackStore } from './lib/gameFeedback'
+import {
+  formatPremiumExpiry,
+  getPremiumSubscriptionInfo,
+  hasPremiumSubscription,
+  subscribeToPremium,
+  syncPremiumFromBackend,
+} from './lib/subscription'
 
 const appUiStyles = `
   :root {
@@ -505,6 +515,84 @@ const appUiStyles = `
       border-radius: 20px;
     }
   }
+
+  @media (max-width: 430px) and (pointer: coarse) {
+    .app-main-header {
+      position: sticky;
+      top: 0;
+      gap: 10px;
+      padding: calc(var(--safe-top, 0px) + 10px) calc(12px + var(--safe-right, 0px)) 12px calc(12px + var(--safe-left, 0px));
+    }
+
+    .app-brand {
+      font-size: 14px;
+    }
+
+    .app-nav {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .app-nav-link {
+      text-align: center;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .app-content {
+      width: calc(100% - 16px);
+      padding-top: 12px;
+      padding-bottom: calc(20px + var(--safe-bottom, 0px));
+    }
+
+    .hero-panel,
+    .surface-card,
+    .form-shell {
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .hero-title {
+      font-size: 26px;
+      line-height: 1.08;
+    }
+
+    .hero-copy {
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .tile-grid,
+    .stats-grid,
+    .admin-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .tile-card {
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .tile-card h3 {
+      font-size: 18px;
+    }
+
+    .tile-footer {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .pill-btn {
+      width: 100%;
+      min-height: 44px;
+    }
+
+    .auth-title {
+      font-size: 24px;
+    }
+  }
 `
 
 type GameCardProps = {
@@ -516,44 +604,12 @@ type GameCardProps = {
   cover?: string
 }
 
-const PREMIUM_ACCESS_STORAGE_KEY = 'gamehub_premium_active'
-const PREMIUM_ACCESS_EXPIRY_KEY = 'gamehub_premium_until'
 const PREMIUM_LOCKED_GAMES = new Set([
   '/games/tug-of-war',
   '/games/word-search',
   '/games/memory-rush',
   '/games/bilim-poyezdi',
 ])
-
-function getPremiumSubscriptionInfo() {
-  if (typeof window === 'undefined') {
-    return { active: false, expiresAt: null as number | null }
-  }
-
-  const rawExpiry = window.localStorage.getItem(PREMIUM_ACCESS_EXPIRY_KEY)
-  const legacyActive = window.localStorage.getItem(PREMIUM_ACCESS_STORAGE_KEY) === 'true'
-
-  if (rawExpiry) {
-    const expiresAt = Number(rawExpiry)
-    if (Number.isFinite(expiresAt) && expiresAt > Date.now()) {
-      return { active: true, expiresAt }
-    }
-    window.localStorage.removeItem(PREMIUM_ACCESS_EXPIRY_KEY)
-    window.localStorage.removeItem(PREMIUM_ACCESS_STORAGE_KEY)
-    return { active: false, expiresAt: null }
-  }
-
-  return { active: legacyActive, expiresAt: null }
-}
-
-function hasPremiumSubscription() {
-  return getPremiumSubscriptionInfo().active
-}
-
-function formatPremiumExpiry(expiresAt: number | null) {
-  if (!expiresAt) return 'No expiry set'
-  return new Date(expiresAt).toLocaleDateString()
-}
 
 function PremiumLockedGameGuard({
   children,
@@ -745,6 +801,7 @@ function GameLayout() {
   return (
     <div className="min-h-screen bg-[#05060a]">
       <Outlet />
+      <GameFeedbackDock />
     </div>
   )
 }
@@ -863,7 +920,7 @@ function Register() {
 }
 
 function HelloAdmin() {
-  const [activeTab, setActiveTab] = useState<'questions' | 'games' | 'users' | 'analytics'>('questions')
+  const [activeTab, setActiveTab] = useState<'questions' | 'feedback' | 'games' | 'users' | 'analytics'>('questions')
   const [refreshKey, setRefreshKey] = useState(0)
   const [gameSettings, setGameSettings] = useState<Record<string, { enabled: boolean; timerSec: number }>>(() => {
     if (typeof window === 'undefined') return {}
@@ -879,6 +936,7 @@ function HelloAdmin() {
 
   const tabs = [
     { key: 'questions', label: 'Questions' },
+    { key: 'feedback', label: 'Feedback' },
     { key: 'games', label: 'Games' },
     { key: 'users', label: 'Users' },
     { key: 'analytics', label: 'Analytics' },
@@ -887,6 +945,7 @@ function HelloAdmin() {
   const teacherList = useMemo(() => getRegisteredTeachers(), [refreshKey])
   const studentList = useMemo(() => getRegisteredStudents(), [refreshKey])
   const teacherStore = useMemo(() => getTeacherContentStore(), [refreshKey])
+  const feedbackItems = useMemo(() => getGameFeedbackStore(), [refreshKey])
   const contentEntries = useMemo<{ gameKey: string; count: number }[]>(
     () =>
       Object.entries(teacherStore).map(([gameKey, items]) => ({
@@ -897,14 +956,18 @@ function HelloAdmin() {
   )
   const totalTeacherQuestions = contentEntries.reduce((sum: number, entry) => sum + entry.count, 0)
   const gamesWithContent = contentEntries.filter((entry) => entry.count > 0).length
+  const pendingFeedbackCount = feedbackItems.filter((item) => item.status === 'pending').length
+  const totalFeedbackCount = feedbackItems.length
 
   useEffect(() => {
     const sync = () => setRefreshKey((v) => v + 1)
     window.addEventListener('storage', sync)
     window.addEventListener('focus', sync)
+    window.addEventListener('game-feedback:changed', sync)
     return () => {
       window.removeEventListener('storage', sync)
       window.removeEventListener('focus', sync)
+      window.removeEventListener('game-feedback:changed', sync)
     }
   }, [])
 
@@ -965,6 +1028,10 @@ function HelloAdmin() {
           <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
             <p className="text-xs text-white/45">Qo‘shilgan savollar</p>
             <p className="mt-1 text-2xl font-semibold text-white">{totalTeacherQuestions}</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
+            <p className="text-xs text-white/45">Pending feedback</p>
+            <p className="mt-1 text-2xl font-semibold text-white">{pendingFeedbackCount}</p>
           </div>
         </div>
       </aside>
@@ -1027,12 +1094,20 @@ function HelloAdmin() {
                 <p className="text-xs text-white/45">Kontentli o‘yinlar</p>
                 <p className="mt-2 text-3xl font-semibold text-white">{gamesWithContent}</p>
               </div>
+              <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                <p className="text-xs text-white/45">Feedback inbox</p>
+                <p className="mt-2 text-3xl font-semibold text-white">{totalFeedbackCount}</p>
+              </div>
             </div>
           </aside>
         </div>
 
         {activeTab === 'questions' ? (
           <TeacherQuestionAdmin />
+        ) : null}
+
+        {activeTab === 'feedback' ? (
+          <TeacherFeedbackInbox />
         ) : null}
 
         {activeTab === 'games' ? (
@@ -1348,9 +1423,12 @@ function Games() {
       setIsLoggedIn(isUserAuthenticated())
       setPremiumUnlocked(hasPremiumSubscription())
     }
+    const unsubscribePremium = subscribeToPremium(sync)
     window.addEventListener('storage', sync)
     window.addEventListener('focus', sync)
+    void syncPremiumFromBackend().then(() => setPremiumUnlocked(hasPremiumSubscription())).catch(() => {})
     return () => {
+      unsubscribePremium()
       window.removeEventListener('storage', sync)
       window.removeEventListener('focus', sync)
     }

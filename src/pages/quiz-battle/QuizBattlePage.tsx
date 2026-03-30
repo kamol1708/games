@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './QuizBattlePage.css'
-import { getTeacherItems } from '../../lib/teacherContent'
+import { useTeacherItems } from '../../lib/useTeacherItems'
 
 type QuizBattlePageProps = {
   onBack: () => void
@@ -138,12 +138,13 @@ function QuizBattlePage({ onBack }: QuizBattlePageProps) {
   const [comboB, setComboB] = useState(0)
   const [bestComboA, setBestComboA] = useState(0)
   const [bestComboB, setBestComboB] = useState(0)
+  const teacherItems = useTeacherItems<unknown>('quiz-battle')
   const mergedBank = useMemo(() => {
-    const teacher = getTeacherItems<unknown>('quiz-battle')
+    const teacher = teacherItems
       .map(normalizeTeacherQuizCard)
       .filter((item): item is Omit<QuestionCard, 'id' | 'used'> => item !== null)
     return [...bank, ...teacher]
-  }, [])
+  }, [teacherItems])
 
   const selectedCard = cards.find((card) => card.id === selectedCardId) ?? null
   const usedCount = cards.filter((card) => card.used).length

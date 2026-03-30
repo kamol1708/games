@@ -6,10 +6,7 @@ import { Button } from '../components/ui/Button'
 import { Container } from '../components/ui/Container'
 import { GradientBlob } from '../components/ui/GradientBlob'
 import { cn } from '../lib/utils'
-
-const PREMIUM_ACCESS_STORAGE_KEY = 'gamehub_premium_active'
-const PREMIUM_ACCESS_EXPIRY_KEY = 'gamehub_premium_until'
-const PREMIUM_DURATION_MS = 30 * 24 * 60 * 60 * 1000
+import { checkoutPremium } from '../lib/subscription'
 
 type BillingCycle = 'monthly' | 'yearly'
 type PlanKey = 'starter' | 'pro' | 'team'
@@ -139,14 +136,22 @@ export default function PaymentPage() {
     }
 
     setIsProcessing(true)
-    await new Promise((resolve) => window.setTimeout(resolve, 1400))
-    const txn = `PAY-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
-    if (plan.key === 'pro' || plan.key === 'team') {
-      window.localStorage.setItem(PREMIUM_ACCESS_STORAGE_KEY, 'true')
-      window.localStorage.setItem(PREMIUM_ACCESS_EXPIRY_KEY, String(Date.now() + PREMIUM_DURATION_MS))
+    try {
+      const result = await checkoutPremium({
+        plan: plan.key,
+        billingCycle,
+        method,
+        fullName,
+        email,
+        seats: effectiveSeats,
+        promoCode: appliedPromoCode,
+      })
+      setSuccessRef(result.transaction_id)
+    } catch (paymentError) {
+      setError(paymentError instanceof Error ? paymentError.message : 'Payment xatoligi.')
+    } finally {
+      setIsProcessing(false)
     }
-    setSuccessRef(txn)
-    setIsProcessing(false)
   }
 
   const applyPromo = () => {

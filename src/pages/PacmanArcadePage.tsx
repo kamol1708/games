@@ -176,6 +176,13 @@ export default function PacmanArcadePage({ onBack }: Props) {
   }, [])
 
   useEffect(() => {
+    document.body.classList.add('iphone-game-viewport')
+    return () => {
+      document.body.classList.remove('iphone-game-viewport')
+    }
+  }, [])
+
+  useEffect(() => {
     const onFs = () => setIsFullscreen(Boolean(document.fullscreenElement))
     document.addEventListener('fullscreenchange', onFs)
     onFs()

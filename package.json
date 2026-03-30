@@ -5,9 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "node backend/server.mjs",
+    "dev:api:fastapi": "./.venv-fastapi/bin/python -m uvicorn backend_fastapi.app.main:app --reload --host 127.0.0.1 --port 8010",
+    "dev:web": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start:api": "node backend/server.mjs",
+    "start:api:fastapi": "./.venv-fastapi/bin/python -m uvicorn backend_fastapi.app.main:app --host 127.0.0.1 --port 8010"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

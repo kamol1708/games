@@ -15,6 +15,7 @@ const links = [
 export function Navbar() {
   const [session, setSession] = useState<AuthSession | null>(null)
   const [showRoleModal, setShowRoleModal] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -93,12 +94,82 @@ export function Navbar() {
 
         <button
           type="button"
+          onClick={() => setMobileMenuOpen((prev) => !prev)}
           className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 md:hidden"
-          aria-label="Menyuni ochish"
+          aria-label={mobileMenuOpen ? 'Menyuni yopish' : 'Menyuni ochish'}
+          aria-expanded={mobileMenuOpen}
         >
           <Menu className="h-4 w-4" />
         </button>
       </div>
+
+      {mobileMenuOpen ? (
+        <div className="glass-card mt-3 rounded-2xl border border-white/10 p-3 md:hidden">
+          <nav className="grid gap-1" aria-label="Mobil navigatsiya">
+            {links.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="rounded-xl px-3 py-3 text-sm text-white/75 transition hover:bg-white/5 hover:text-white"
+              >
+                {link.label}
+              </a>
+            ))}
+            <Link
+              to="/docs"
+              onClick={() => setMobileMenuOpen(false)}
+              className="rounded-xl px-3 py-3 text-sm text-white/75 transition hover:bg-white/5 hover:text-white"
+            >
+              Hujjatlar
+            </Link>
+          </nav>
+
+          <div className="mt-3 grid gap-2 border-t border-white/10 pt-3">
+            {session ? (
+              <>
+                {session.role === 'teacher' || session.role === 'admin' ? (
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-300/20 bg-amber-400/10 px-3 py-3 text-sm font-medium text-amber-100"
+                  >
+                    <Shield className="h-4 w-4" />
+                    O‘qituvchi paneli
+                  </Link>
+                ) : (
+                  <div className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-300/20 bg-blue-400/10 px-3 py-3 text-sm font-medium text-blue-100">
+                    🎓 {session.fullName.split(' ')[0] || 'O‘quvchi'}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await logout()
+                    setSession(null)
+                    setMobileMenuOpen(false)
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-white/80 hover:bg-white/10"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Chiqish
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false)
+                  setShowRoleModal(true)
+                }}
+                className="glass-card inline-flex h-11 items-center justify-center rounded-xl px-3 text-sm text-white/90 hover:bg-white/10"
+              >
+                Kirish
+              </button>
+            )}
+          </div>
+        </div>
+      ) : null}
 
       {showRoleModal ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" role="presentation">

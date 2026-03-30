@@ -49,7 +49,7 @@ export type PlayMode = 'TURN_BASED' | 'BUZZER'
 export type WinMode = 'FIRST_MILLION' | 'HIGHEST_AFTER_N' | 'BEST_OF_ROUNDS'
 
 export type Settings = {
-  teamCount: 2 | 3 | 4
+  teamCount: 1 | 2 | 3 | 4
   gradeBand: GradeBand
   enabledSubjects: Record<Subject, boolean>
   timerEnabled: boolean
@@ -119,7 +119,7 @@ export type GameState = {
 }
 
 export type SetupForm = {
-  teamCount: 2 | 3 | 4
+  teamCount: 1 | 2 | 3 | 4
   teamNames: string[]
   teamColors: TeamColor[]
 }

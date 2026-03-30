@@ -650,3 +650,59 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 430px) and (pointer: coarse) {
+  .jb3d-shell {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+
+  .jb3d-canvas-wrap {
+    inset: 0;
+  }
+
+  .jb3d-hud {
+    padding:
+      calc(8px + var(--safe-top, 0px))
+      calc(8px + var(--safe-right, 0px))
+      calc(8px + var(--safe-bottom, 0px))
+      calc(8px + var(--safe-left, 0px));
+    gap: 8px;
+  }
+
+  .jb3d-hud-top,
+  .jb3d-controls,
+  .jb3d-scoreboard,
+  .jb3d-win-score-grid,
+  .jb3d-race-grid,
+  .jb3d-quiz-form {
+    grid-template-columns: 1fr;
+  }
+
+  .jb3d-panel,
+  .jb3d-win-card,
+  .jb3d-quiz-card,
+  .jb3d-race-card {
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  .jb3d-action-stack,
+  .jb3d-action-stack-right {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .jb3d-btn {
+    min-height: 44px;
+  }
+
+  .jb3d-log-panel {
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  .iphone-back-btn {
+    transform: translateY(var(--safe-top, 0px));
+  }
+}

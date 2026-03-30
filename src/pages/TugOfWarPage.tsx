@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import TugBattlePage, { type BattleQuestion } from './TugBattlePage'
 import './TugOfWarPage.css'
-import { getTeacherItems } from '../lib/teacherContent'
+import { useTeacherItems } from '../lib/useTeacherItems'
 import { generateQuestionsWithGemini } from '../lib/geminiQuestionGenerator'
 
 type Operation = 'add' | 'sub' | 'mul' | 'div'
@@ -195,13 +195,14 @@ function TugOfWarPage() {
   const [isGeneratingAi, setIsGeneratingAi] = useState(false)
   const [aiError, setAiError] = useState('')
   const [aiInfo, setAiInfo] = useState('')
+  const teacherItems = useTeacherItems<unknown>('tug-of-war')
 
   const teacherQuestions = useMemo(
     () =>
-      getTeacherItems<unknown>('tug-of-war')
+      teacherItems
         .map((item) => normalizeBattleQuestion(item))
         .filter((item): item is BattleQuestion => item !== null),
-    [],
+    [teacherItems],
   )
 
   const generatedQuestions = useMemo(() => buildQuestionSet(selectedOps, level, QUESTION_COUNT), [selectedOps, level])

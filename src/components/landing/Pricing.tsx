@@ -6,9 +6,12 @@ import { Container } from '../ui/Container'
 import { Reveal } from '../ui/Reveal'
 import { SectionTitle } from '../ui/SectionTitle'
 import { cn } from '../../lib/utils'
-
-const PREMIUM_ACCESS_STORAGE_KEY = 'gamehub_premium_active'
-const PREMIUM_ACCESS_EXPIRY_KEY = 'gamehub_premium_until'
+import {
+  cancelPremiumSubscription,
+  getPremiumSubscriptionInfo,
+  subscribeToPremium,
+  syncPremiumFromBackend,
+} from '../../lib/subscription'
 
 const plans = [
   {
@@ -43,19 +46,21 @@ export function Pricing() {
   const [premiumExpiry, setPremiumExpiry] = useState<number | null>(null)
 
   useEffect(() => {
-    const active = window.localStorage.getItem(PREMIUM_ACCESS_STORAGE_KEY) === 'true'
-    const rawExpiry = window.localStorage.getItem(PREMIUM_ACCESS_EXPIRY_KEY)
-    const expiresAt = rawExpiry ? Number(rawExpiry) : null
-    const validExpiry = expiresAt && Number.isFinite(expiresAt) && expiresAt > Date.now() ? expiresAt : null
-    setPremiumActive(active && Boolean(validExpiry))
-    setPremiumExpiry(validExpiry)
+    const apply = () => {
+      const info = getPremiumSubscriptionInfo()
+      setPremiumActive(info.active)
+      setPremiumExpiry(info.expiresAt)
+    }
+
+    apply()
+    const unsubscribe = subscribeToPremium(apply)
+    void syncPremiumFromBackend().then(apply).catch(() => {})
+
+    return unsubscribe
   }, [])
 
-  const cancelSubscription = () => {
-    window.localStorage.removeItem(PREMIUM_ACCESS_STORAGE_KEY)
-    window.localStorage.removeItem(PREMIUM_ACCESS_EXPIRY_KEY)
-    setPremiumActive(false)
-    setPremiumExpiry(null)
+  const cancelSubscription = async () => {
+    await cancelPremiumSubscription().catch(() => {})
   }
 
   return (

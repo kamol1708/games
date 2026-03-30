@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './FootballChallengePage.css'
-import { getTeacherItems } from '../lib/teacherContent'
+import { useTeacherItems } from '../lib/useTeacherItems'
 
 type Quiz = {
   question: string
@@ -99,17 +99,32 @@ function playSfx(kind: 'goal' | 'save' | 'correct' | 'wrong') {
 }
 
 export default function FootballChallengePage({ onBack }: FootballChallengePageProps) {
+  const teacherItems = useTeacherItems<unknown>('football-challenge')
   const teacherQuestions = useMemo(
     () =>
-      getTeacherItems<unknown>('football-challenge')
+      teacherItems
         .map(normalizeTeacherFootballQuiz)
         .filter((item): item is Quiz => item !== null),
-    [],
+    [teacherItems],
   )
 
   const questionPool = useMemo(() => {
-    const source = teacherQuestions.length > 0 ? teacherQuestions : fallbackQuestions
-    return shuffle(source).slice(0, TOTAL_ROUNDS)
+    const merged: Quiz[] = [...fallbackQuestions]
+    const seen = new Set(
+      fallbackQuestions.map((item) => `${item.question.trim().toLowerCase()}::${item.answer.trim().toLowerCase()}`),
+    )
+
+    teacherQuestions.forEach((item) => {
+      const key = `${item.question.trim().toLowerCase()}::${item.answer.trim().toLowerCase()}`
+      if (seen.has(key)) {
+        return
+      }
+
+      seen.add(key)
+      merged.push(item)
+    })
+
+    return shuffle(merged).slice(0, TOTAL_ROUNDS)
   }, [teacherQuestions])
 
   const [stage, setStage] = useState<GameStage>('intro')

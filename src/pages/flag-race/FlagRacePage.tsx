@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './FlagRacePage.css'
 import { countries, difficultyPoints, type Difficulty, type FlagCountry } from './countries'
+import { useTeacherItems } from '../../lib/useTeacherItems'
 
 type Screen = 'setup' | 'playing' | 'finished'
 type Round = {
@@ -64,6 +65,7 @@ type FlagRacePageProps = {
 }
 
 function FlagRacePage({ onBack }: FlagRacePageProps) {
+  const teacherCountries = useTeacherItems<FlagCountry>('flag-race')
   const [screen, setScreen] = useState<Screen>('setup')
   const [teamA, setTeamA] = useState('1-Jamoa')
   const [teamB, setTeamB] = useState('2-Jamoa')
@@ -75,6 +77,36 @@ function FlagRacePage({ onBack }: FlagRacePageProps) {
   const [roundWinner, setRoundWinner] = useState<0 | 1 | null>(null)
   const [statusText, setStatusText] = useState('Bayroq nomini birinchi bo‘lib toping.')
   const [error, setError] = useState('')
+
+  const countryPool = useMemo(() => {
+    const normalizedTeacher = teacherCountries.filter(
+      (item) =>
+        item &&
+        typeof item.name === 'string' &&
+        item.name.trim().length >= 2 &&
+        typeof item.code === 'string' &&
+        item.code.trim().length === 2,
+    )
+
+    const merged = [...countries]
+    const seen = new Set(countries.map((item) => item.name.trim().toLowerCase()))
+
+    normalizedTeacher.forEach((item) => {
+      const key = item.name.trim().toLowerCase()
+      if (seen.has(key)) {
+        return
+      }
+
+      seen.add(key)
+      merged.push({
+        name: item.name.trim(),
+        code: item.code.trim().toUpperCase(),
+        difficulty: item.difficulty,
+      })
+    })
+
+    return merged
+  }, [teacherCountries])
 
   const currentRound = rounds[roundIndex]
   const totalRounds = rounds.length
@@ -149,8 +181,13 @@ function FlagRacePage({ onBack }: FlagRacePageProps) {
       return
     }
 
-    const generated = buildRounds(countries)
+    const generated = buildRounds(countryPool)
     const firstRound = generated[0]
+
+    if (!firstRound) {
+      setError('O‘yin uchun bayroqlar topilmadi.')
+      return
+    }
 
     setRounds(generated)
     setRoundIndex(0)
@@ -166,8 +203,14 @@ function FlagRacePage({ onBack }: FlagRacePageProps) {
   }
 
   const restartGame = () => {
-    const generated = buildRounds(countries)
+    const generated = buildRounds(countryPool)
     const firstRound = generated[0]
+
+    if (!firstRound) {
+      setScreen('setup')
+      setError('O‘yin uchun bayroqlar topilmadi.')
+      return
+    }
 
     setRounds(generated)
     setRoundIndex(0)
@@ -242,7 +285,7 @@ function FlagRacePage({ onBack }: FlagRacePageProps) {
 
           <div className="fr-actions">
             <button type="button" className="fr-back" onClick={onBack}>Orqaga</button>
-            <button type="button" className="fr-start" onClick={startGame}>Boshlash (70 bayroq)</button>
+            <button type="button" className="fr-start" onClick={startGame}>Boshlash ({countryPool.length} bayroq)</button>
           </div>
         </section>
       </main>

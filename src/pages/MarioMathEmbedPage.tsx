@@ -58,6 +58,13 @@ export default function MarioMathEmbedPage({ onBack }: Props) {
   }, [])
 
   useEffect(() => {
+    document.body.classList.add('iphone-game-viewport')
+    return () => {
+      document.body.classList.remove('iphone-game-viewport')
+    }
+  }, [])
+
+  useEffect(() => {
     const onFullscreenChange = () => {
       setIsFullscreen(Boolean(document.fullscreenElement))
     }

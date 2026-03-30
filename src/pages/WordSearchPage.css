@@ -83,23 +83,6 @@
   line-height: 1.45;
 }
 
-.ws-cover {
-  margin-top: 10px;
-  border: 1px solid #d4e4f0;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 10px 24px rgba(65, 95, 128, 0.1);
-}
-
-.ws-cover img {
-  display: block;
-  width: 100%;
-  height: clamp(140px, 22vw, 260px);
-  object-fit: cover;
-  object-position: center;
-}
-
 .ws-score {
   margin-top: 12px;
   display: grid;

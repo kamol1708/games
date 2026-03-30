@@ -11,8 +11,10 @@ export default function JungleBoard3DPage({ onBack }: Props) {
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    document.body.classList.add('iphone-game-viewport')
     return () => {
       document.body.style.overflow = prev
+      document.body.classList.remove('iphone-game-viewport')
     }
   }, [])
 
@@ -32,7 +34,7 @@ export default function JungleBoard3DPage({ onBack }: Props) {
           <button
             type="button"
             onClick={onBack}
-            className="pointer-events-auto rounded-2xl border border-white/15 bg-black/75 px-4 py-2.5 text-base font-semibold text-white/95 backdrop-blur hover:bg-black/85"
+            className="pointer-events-auto rounded-2xl border border-white/15 bg-black/75 px-4 py-2.5 text-base font-semibold text-white/95 backdrop-blur hover:bg-black/85 iphone-back-btn"
           >
             ← Games
           </button>

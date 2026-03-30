@@ -26,10 +26,10 @@ export default function KimMillionerPage({ onBack }: Props) {
 
   const activeTeam = state.teams.find((t) => t.id === state.activeTeamId) ?? null
   const currentStep = (activeTeam?.currentQuestionIndex ?? 0) + 1
-  const gameTeams = state.teams.slice(0, 2)
+  const gameTeams = state.teams
 
   useEffect(() => {
-    if (state.settings.teamCount !== 2) {
+    if (![1, 2].includes(state.settings.teamCount)) {
       dispatch({ type: 'UPDATE_SETTINGS', payload: { teamCount: 2 } })
     }
   }, [state.settings.teamCount])
@@ -142,9 +142,9 @@ export default function KimMillionerPage({ onBack }: Props) {
     dispatch({
       type: 'START_GAME',
       payload: {
-        teamCount: 2,
-        teamNames: teamNames.slice(0, 2),
-        teamColors: teamColors.slice(0, 2),
+        teamCount: state.settings.teamCount,
+        teamNames: teamNames.slice(0, state.settings.teamCount),
+        teamColors: teamColors.slice(0, state.settings.teamCount),
       },
     })
   }
@@ -208,8 +208,8 @@ export default function KimMillionerPage({ onBack }: Props) {
         <header className="rounded-2xl border border-white/10 bg-[#0a1020]/85 p-4 backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/70">Million Quiz – Classroom Mode</p>
-              <h1 className="text-2xl font-black sm:text-3xl">Projector Battle (2–4 Teams)</h1>
+              <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/70">Million Quiz – Flexible Mode</p>
+              <h1 className="text-2xl font-black sm:text-3xl">Projector Battle (1 yoki 2 o‘yinchi)</h1>
             </div>
             <div className="flex flex-wrap gap-2">
               {onBack ? (
@@ -253,7 +253,22 @@ export default function KimMillionerPage({ onBack }: Props) {
               <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="grid gap-1 text-sm">
                   <span className="text-white/70">Team count</span>
-                  <div className="rounded-lg border border-white/20 bg-black/30 px-2 py-2 font-semibold text-cyan-200">2 teams (fixed)</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[1, 2].map((count) => (
+                      <button
+                        key={count}
+                        type="button"
+                        onClick={() => dispatch({ type: 'UPDATE_SETTINGS', payload: { teamCount: count as 1 | 2 } })}
+                        className={`rounded-lg border px-2 py-2 font-semibold transition ${
+                          state.settings.teamCount === count
+                            ? 'border-cyan-300/50 bg-cyan-500/15 text-cyan-100'
+                            : 'border-white/20 bg-black/30 text-white/75'
+                        }`}
+                      >
+                        {count} kishilik
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <label className="grid gap-1 text-sm">
@@ -337,9 +352,9 @@ export default function KimMillionerPage({ onBack }: Props) {
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {Array.from({ length: 2 }).map((_, idx) => (
+                {Array.from({ length: state.settings.teamCount }, (_, idx) => (
                   <article key={idx} className="rounded-xl border border-white/10 bg-black/25 p-3">
-                    <label className="text-xs text-white/65">Team {idx + 1} name</label>
+                    <label className="text-xs text-white/65">{state.settings.teamCount === 1 ? 'Player' : 'Team'} {idx + 1} name</label>
                     <input
                       value={teamNames[idx]}
                       onChange={(e) => {
@@ -394,7 +409,7 @@ export default function KimMillionerPage({ onBack }: Props) {
         ) : (
           <section className="mt-4 grid gap-4 xl:grid-cols-[1.2fr_360px]">
             <div className="space-y-4">
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className={`grid gap-2 ${gameTeams.length > 1 ? 'sm:grid-cols-2' : ''}`}>
                 {gameTeams.map((team) => (
                   <article
                     key={team.id}
@@ -421,7 +436,7 @@ export default function KimMillionerPage({ onBack }: Props) {
                   <h2 className="mt-2 text-2xl font-black leading-tight sm:text-3xl">{state.currentQuestion?.text ?? 'Savol mavjud emas'}</h2>
                 </div>
 
-                <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                <div className={`mt-3 grid gap-3 ${gameTeams.length > 1 ? 'lg:grid-cols-2' : ''}`}>
                   {gameTeams.map((team) => {
                     const lockedByOther = Boolean(state.buzzedTeamId && state.buzzedTeamId !== team.id)
                     const isAnswerOwner = state.buzzedTeamId === team.id

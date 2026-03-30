@@ -1,5 +1,6 @@
 import { QUESTION_BANK } from '../data/questions'
 import type { Difficulty, GameSettings, GradeMode, Question, TeamState, TrackChallenge, TrackKey } from '../types/game'
+import { getTeacherItems } from '../../../lib/teacherContent'
 
 const TRACK_ORDER: TrackKey[] = ['A', 'B', 'C']
 const DIFFICULTY_BY_TRACK: Record<TrackKey, Difficulty> = { A: 'easy', B: 'medium', C: 'hard' }
@@ -12,6 +13,37 @@ export const SCORE_RULES = {
 } as const
 
 const TEAM_COLORS = ['#60a5fa', '#f472b6', '#f59e0b', '#34d399', '#a78bfa', '#fb7185']
+
+function getTeacherQuestions(): Question[] {
+  return getTeacherItems<Partial<Question>>('bilim-poyezdi')
+    .filter((item): item is Partial<Question> & { id: string; subject: Question['subject']; difficulty: Difficulty; type: Question['type']; gradeModes: GradeMode[]; prompt: string; answer: string } =>
+      Boolean(
+        item &&
+        typeof item.id === 'string' &&
+        typeof item.subject === 'string' &&
+        typeof item.difficulty === 'string' &&
+        typeof item.type === 'string' &&
+        Array.isArray(item.gradeModes) &&
+        typeof item.prompt === 'string' &&
+        typeof item.answer === 'string',
+      ),
+    )
+    .map((item) => ({
+      id: item.id,
+      subject: item.subject,
+      difficulty: item.difficulty,
+      type: item.type,
+      gradeModes: item.gradeModes.filter((mode): mode is GradeMode => mode === '5-7' || mode === '8-11'),
+      prompt: item.prompt.trim(),
+      options: item.type === 'mcq' ? item.options?.filter((option): option is string => typeof option === 'string' && option.trim().length > 0).map((option) => option.trim()) : undefined,
+      answer: item.answer.trim(),
+    }))
+    .filter((item) => item.prompt.length > 0 && item.answer.length > 0 && item.gradeModes.length > 0 && (item.type === 'numeric' || (item.options?.length ?? 0) >= 2))
+}
+
+function getQuestionBank(): Question[] {
+  return [...QUESTION_BANK, ...getTeacherQuestions()]
+}
 
 export function createTeams(names: string[]): TeamState[] {
   return names.map((name, index) => ({
@@ -26,7 +58,7 @@ export function createTeams(names: string[]): TeamState[] {
 }
 
 export function getQuestionsByGrade(gradeMode: GradeMode): Question[] {
-  return QUESTION_BANK.filter((q) => q.gradeModes.includes(gradeMode))
+  return getQuestionBank().filter((q) => q.gradeModes.includes(gradeMode))
 }
 
 function shuffle<T>(items: T[]): T[] {
@@ -77,7 +109,7 @@ export function buildStationTracks(
 }
 
 export function getQuestionById(id: string): Question | undefined {
-  return QUESTION_BANK.find((q) => q.id === id)
+  return getQuestionBank().find((q) => q.id === id)
 }
 
 export function normalizeAnswer(value: string) {
@@ -91,4 +123,3 @@ export function isCorrectAnswer(question: Question, input: string): boolean {
 export function nextTeamIndex(current: number, total: number): number {
   return total === 0 ? 0 : (current + 1) % total
 }
-

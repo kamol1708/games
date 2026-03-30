@@ -44,7 +44,11 @@ export default function HUD({
         <section className="jb3d-glass jb3d-panel jb3d-hero-panel">
           <h1 className="jb3d-title">100-Qadamli 3D Jungle Xarita</h1>
           {!isFullscreen ? (
-            <p className="jb3d-subtext">2 ta jamoa navbat bilan zar tashlaydi. Tuzoq kataklar ortga qaytaradi, boost kataklar oldinga sakratadi.</p>
+            <p className="jb3d-subtext">
+              {players.length === 1
+                ? 'Solo mode: har yurishdan oldin savolga javob bering, tuzoqlardan qochib finishga yeting.'
+                : '2 ta jamoa navbat bilan zar tashlaydi. Tuzoq kataklar ortga qaytaradi, boost kataklar oldinga sakratadi.'}
+            </p>
           ) : null}
           <div className="jb3d-scoreboard" style={{ marginTop: 14 }}>
             {players.map((player, idx) => (

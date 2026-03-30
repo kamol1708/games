@@ -13,21 +13,26 @@ type TurnQuizState = {
   question: RaceQuestion
   selected: number | null
   locked: boolean
-  currentPlayerIdx: 0 | 1
+  currentPlayerIdx: number
   turn: number
 }
 
-function createPlayers(): PlayerDef[] {
-  return [
-    { id: 1, name: 'Jamoa 1', color: PLAYER_COLORS[0], tileIndex: 0, score: 0 },
-    { id: 2, name: 'Jamoa 2', color: PLAYER_COLORS[1], tileIndex: 0, score: 0 },
-  ]
+function createPlayers(playerCount: 1 | 2): PlayerDef[] {
+  return Array.from({ length: playerCount }, (_, index) => ({
+    id: index + 1,
+    name: playerCount === 1 ? 'Solo Player' : `Jamoa ${index + 1}`,
+    color: PLAYER_COLORS[index],
+    tileIndex: 0,
+    score: 0,
+  }))
 }
 
 export default function JungleBoardGame() {
   const tilesRef = useRef<TileDef[]>(createTiles())
-  const [players, setPlayers] = useState<PlayerDef[]>(() => createPlayers())
-  const [activePlayerIndex, setActivePlayerIndex] = useState<0 | 1>(0)
+  const [playerCount, setPlayerCount] = useState<1 | 2>(2)
+  const [players, setPlayers] = useState<PlayerDef[]>(() => createPlayers(2))
+  const [activePlayerIndex, setActivePlayerIndex] = useState(0)
+  const [showModePicker, setShowModePicker] = useState(true)
   const [phase, setPhase] = useState<GamePhase>('idle')
   const [diceValue, setDiceValue] = useState<number | null>(null)
   const [diceRolling, setDiceRolling] = useState(false)
@@ -102,14 +107,14 @@ export default function JungleBoardGame() {
   }, [])
 
   const nextTurn = useCallback(() => {
-    setActivePlayerIndex((prev) => (prev === 0 ? 1 : 0))
+    setActivePlayerIndex((prev) => (prev + 1) % players.length)
     setPhase('idle')
-    setMessage('Keyingi jamoa uchun Zar Tashlash tugmasini bosing.')
-  }, [])
+    setMessage(players.length === 1 ? 'Yangi savol uchun Zar Tashlash tugmasini bosing.' : 'Keyingi jamoa uchun Zar Tashlash tugmasini bosing.')
+  }, [players.length])
 
   const resetBoard = useCallback(() => {
     tilesRef.current = createTiles()
-    setPlayers(createPlayers())
+    setPlayers(createPlayers(playerCount))
     setActivePlayerIndex(0)
     setPhase('idle')
     setDiceValue(null)
@@ -119,9 +124,9 @@ export default function JungleBoardGame() {
     setLastEventLabel('')
     setTurnQuiz(null)
     quizResolverRef.current = null
-    setMessage("Yangi 100-qadamli jungle xarita yaratildi. Har navbatda 1 ta savol beriladi.")
+    setMessage(playerCount === 1 ? 'Yangi solo jungle xarita yaratildi. Har yurishda savol beriladi.' : "Yangi 100-qadamli jungle xarita yaratildi. Har navbatda 1 ta savol beriladi.")
     actionLockRef.current = false
-  }, [])
+  }, [playerCount])
 
   const runTileEvent = useCallback(async (playerIdx: number, tileIndex: number) => {
     const tile = tilesRef.current[tileIndex]
@@ -166,7 +171,7 @@ export default function JungleBoardGame() {
   const performRollFor = useCallback(async (playerIdx: number) => {
     const actor = players[playerIdx]
 
-    setActivePlayerIndex(playerIdx as 0 | 1)
+    setActivePlayerIndex(playerIdx)
     setPhase('rolling')
     setDiceRolling(true)
     setLastEventLabel('ROLL')
@@ -193,7 +198,7 @@ export default function JungleBoardGame() {
     await runTileEvent(playerIdx, current)
   }, [players, runTileEvent, setPlayerTile])
 
-  const startTurnQuiz = useCallback((difficulty: QuizDifficulty, playerIdx: 0 | 1) => {
+  const startTurnQuiz = useCallback((difficulty: QuizDifficulty, playerIdx: number) => {
     return new Promise<boolean>((resolve) => {
       quizResolverRef.current = resolve
       const question = buildSingleQuestion(difficulty)
@@ -204,7 +209,7 @@ export default function JungleBoardGame() {
         selected: null,
         locked: false,
         currentPlayerIdx: playerIdx,
-        turn: playerIdx === 0 ? 1 : 2,
+        turn: playerIdx + 1,
       })
       setMessage(`${players[playerIdx].name} uchun savol (${difficulty.toUpperCase()})`) 
     })
@@ -234,7 +239,7 @@ export default function JungleBoardGame() {
     actionLockRef.current = true
 
     const playerIdx = activePlayerIndex
-    const maxStep = Math.max(players[0].tileIndex + 1, players[1].tileIndex + 1)
+    const maxStep = Math.max(...players.map((player) => player.tileIndex + 1))
     const difficulty = pickDifficultyByStep(maxStep)
 
     setPhase('quiz')
@@ -260,6 +265,24 @@ export default function JungleBoardGame() {
       setTurnQuiz(null)
     }
   }, [phase])
+
+  const startMode = useCallback((count: 1 | 2) => {
+    setPlayerCount(count)
+    setShowModePicker(false)
+    tilesRef.current = createTiles()
+    setPlayers(createPlayers(count))
+    setActivePlayerIndex(0)
+    setPhase('idle')
+    setDiceValue(null)
+    setDiceRolling(false)
+    setDiceSpinSeed((s) => s + 1)
+    setWinnerId(null)
+    setLastEventLabel('')
+    setTurnQuiz(null)
+    quizResolverRef.current = null
+    actionLockRef.current = false
+    setMessage(count === 1 ? 'Solo jungle safari boshlandi. Savolga javob berib zar tashlang.' : '2 kishilik jungle safari boshlandi. Navbat bilan savol yechib, oldinga boring.')
+  }, [])
 
   return (
     <div className="jb3d-shell">
@@ -335,6 +358,20 @@ export default function JungleBoardGame() {
                 </p>
               ) : null}
             </section>
+          </div>
+        </div>
+      ) : null}
+
+      {showModePicker ? (
+        <div className="jb3d-win-overlay" role="presentation">
+          <div className="jb3d-win-card" role="dialog" aria-modal="true" aria-labelledby="jb3d-mode-title">
+            <p className="jb3d-win-tag">JUNGLE MODE</p>
+            <h2 id="jb3d-mode-title">Qanday o‘ynaymiz?</h2>
+            <p className="jb3d-win-text">Yakka o‘ynash yoki 2 kishilik navbatma-navbat mode’ni tanlang. Desktop holati o‘zgarmaydi.</p>
+            <div className="jb3d-win-score-grid">
+              <button className="jb3d-btn jb3d-btn-primary" type="button" onClick={() => startMode(1)}>1 kishilik</button>
+              <button className="jb3d-btn" type="button" onClick={() => startMode(2)}>2 kishilik</button>
+            </div>
           </div>
         </div>
       ) : null}

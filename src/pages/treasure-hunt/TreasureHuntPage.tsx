@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import './TreasureHuntPage.css'
 import mapImage from '../../assets/map.jpg'
-import { getTeacherItems } from '../../lib/teacherContent'
+import { useTeacherItems } from '../../lib/useTeacherItems'
 
 type TreasureHuntPageProps = {
   onBack: () => void
@@ -133,13 +133,14 @@ function TreasureHuntPage({ onBack }: TreasureHuntPageProps) {
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(0)
   const [clearedClues, setClearedClues] = useState<number[]>([])
+  const teacherItems = useTeacherItems<unknown>('treasure-hunt')
 
   const allClues = useMemo(() => {
-    const teacher = getTeacherItems<unknown>('treasure-hunt')
+    const teacher = teacherItems
       .map(normalizeTeacherClue)
       .filter((item): item is Clue => item !== null)
     return [...clues, ...teacher]
-  }, [])
+  }, [teacherItems])
 
   const current = allClues[index]
 

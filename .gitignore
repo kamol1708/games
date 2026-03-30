@@ -13,6 +13,17 @@ dist-ssr
 *.local
 .env
 .env.*
+!.env.example
+.venv/
+.venv-fastapi/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+backend/data/*.json
+!backend/data/.gitkeep
 
 # Editor directories and files
 .vscode/*

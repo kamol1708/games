@@ -6,8 +6,8 @@ type Props = {
 }
 
 export function SetupScreen({ onStart }: Props) {
-  const [teamCount, setTeamCount] = useState(2)
-  const [teamNames, setTeamNames] = useState<string[]>(['Team A', 'Team B', '', '', '', ''])
+  const [teamCount, setTeamCount] = useState(1)
+  const [teamNames, setTeamNames] = useState<string[]>(['Player 1', '', '', '', '', ''])
   const [difficulty, setDifficulty] = useState<Difficulty>('beginner')
   const [boxCount, setBoxCount] = useState<BoxCount>(16)
 
@@ -43,7 +43,7 @@ export function SetupScreen({ onStart }: Props) {
                   onChange={(e) => setTeamCount(Number(e.target.value))}
                   className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-slate-900 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-200"
                 >
-                  {[2, 3, 4, 5, 6].map((n) => (
+                  {[1, 2, 3, 4, 5, 6].map((n) => (
                     <option key={n} value={n}>
                       {n} ta jamoa
                     </option>

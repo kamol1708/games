@@ -6,11 +6,11 @@ type Props = {
 }
 
 export function SetupScreen({ onStart }: Props) {
-  const [teamCount, setTeamCount] = useState(2)
+  const [teamCount, setTeamCount] = useState(1)
   const [gradeMode, setGradeMode] = useState<GradeMode>('5-7')
   const [questionTimeSec, setQuestionTimeSec] = useState(20)
   const [stationCount, setStationCount] = useState(10)
-  const [teamNames, setTeamNames] = useState<string[]>(['Team 1', 'Team 2'])
+  const [teamNames, setTeamNames] = useState<string[]>(['Team 1'])
 
   useEffect(() => {
     setTeamNames((prev) => {
@@ -20,7 +20,7 @@ export function SetupScreen({ onStart }: Props) {
   }, [teamCount])
 
   const isValid = useMemo(
-    () => teamNames.every((name) => name.trim().length > 0) && teamCount >= 2 && teamCount <= 6,
+    () => teamNames.every((name) => name.trim().length > 0) && teamCount >= 1 && teamCount <= 6,
     [teamNames, teamCount],
   )
 
@@ -52,7 +52,7 @@ export function SetupScreen({ onStart }: Props) {
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {[
-                '2-6 ta jamoa',
+                '1-6 ta o‘yinchi yoki jamoa',
                 '3 ta track (A/B/C)',
                 'Matematika / Fan / Mantiq',
                 'Timer + bonus ball',
@@ -73,14 +73,14 @@ export function SetupScreen({ onStart }: Props) {
               <label className="mb-2 block text-sm text-white/75">Jamoalar soni</label>
               <input
                 type="range"
-                min={2}
+                min={1}
                 max={6}
                 value={teamCount}
                 onChange={(e) => setTeamCount(Number(e.target.value))}
                 className="w-full accent-violet-400"
               />
               <div className="mt-2 flex justify-between text-xs text-white/55">
-                <span>2</span>
+                <span>1</span>
                 <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-white">{teamCount} teams</span>
                 <span>6</span>
               </div>

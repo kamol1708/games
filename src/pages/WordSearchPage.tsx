@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './WordSearchPage.css'
-import { getTeacherItems } from '../lib/teacherContent'
-import wordSearchCover from '../assets/word-search-cover.jpg'
+import { useTeacherItems } from '../lib/useTeacherItems'
 
 type Cell = {
   row: number
@@ -180,13 +179,13 @@ function formatTimer(totalSeconds: number) {
 function WordSearchPage({ onBack }: WordSearchPageProps) {
   const [teamA, setTeamA] = useState('1-Jamoa')
   const [teamB, setTeamB] = useState('2-Jamoa')
+  const teacherItems = useTeacherItems<unknown>('word-search')
   const teacherWords = useMemo(() => {
-    const raw = getTeacherItems<unknown>('word-search')
-    const normalized = raw
+    const normalized = teacherItems
       .map((item) => (typeof item === 'string' ? item.trim().toUpperCase() : ''))
       .filter((word) => /^[A-Z]+$/.test(word) && word.length >= 3 && word.length <= GRID_SIZE)
     return Array.from(new Set(normalized)).slice(0, 20)
-  }, [])
+  }, [teacherItems])
 
   const [puzzleA, setPuzzleA] = useState<Puzzle>(() => buildPuzzle(teacherWords))
   const [puzzleB, setPuzzleB] = useState<Puzzle>(() => buildPuzzle(teacherWords))
@@ -392,10 +391,6 @@ function WordSearchPage({ onBack }: WordSearchPageProps) {
             <button type="button" className="ws-reset" onClick={resetPuzzle}>Yangilash</button>
           </div>
         </header>
-
-        <div className="ws-cover">
-          <img src={wordSearchCover} alt="Word Search cover" />
-        </div>
 
         <p className="ws-tip">
           Endi har bir jamoaning alohida harflar to&apos;plami bor.
