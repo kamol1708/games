@@ -274,14 +274,6 @@ function getAutoAiDifficulty(stats: SubjectPerformanceState, fallback: AiDifficu
   return 'easy'
 }
 
-function getSubjectLevelLabel(stat?: SubjectStats) {
-  if (!stat || stat.total === 0) return 'hali ma’lumot kam'
-  const accuracy = stat.correct / stat.total
-  if (accuracy >= 0.75) return 'yaxshi'
-  if (accuracy >= 0.45) return 'o‘rtacha'
-  return 'qiynaladi'
-}
-
 function getAiRecommendation(stats: SubjectPerformanceState) {
   const ranked = Object.entries(stats).sort((a, b) => b[1].total - a[1].total)
   const strongest = [...ranked].sort((a, b) => (b[1].correct / Math.max(1, b[1].total)) - (a[1].correct / Math.max(1, a[1].total)))[0]
@@ -302,7 +294,7 @@ function getAiRecommendation(stats: SubjectPerformanceState) {
   return `${weakest[0]} bo‘yicha mashqni ko‘paytirish foydali bo‘ladi.`
 }
 
-function StageScoreboard({ stageWins, currentStage, gameMode }: { stageWins: StageWinState; currentStage: number; gameMode: GameMode | null }) {
+function StageScoreboard({ stageWins, gameMode }: { stageWins: StageWinState; gameMode: GameMode | null }) {
   if (!isCompetitiveMode(gameMode)) {
     return null
   }
@@ -1375,7 +1367,7 @@ export default function FrogPondPage() {
                   <span>Bosqich</span>
                   <strong>{stageIndex + 1} / {STAGE_COUNT}</strong>
                 </div>
-                <StageScoreboard stageWins={stageWins} currentStage={stageIndex} gameMode={gameMode} />
+                <StageScoreboard stageWins={stageWins} gameMode={gameMode} />
                 <div className="frog-pond-board-pill">
                   <span>Daraja</span>
                   <strong>{Math.min(currentLevelIndex + 1, LEVEL_COUNT)} / {LEVEL_COUNT}</strong>
