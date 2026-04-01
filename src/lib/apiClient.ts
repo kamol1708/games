@@ -24,7 +24,10 @@ type ApiErrorPayload = {
 }
 
 function getCandidateBaseUrls() {
-  const urls = [API_BASE_URL]
+  const urls =
+    typeof window !== 'undefined' && (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+      ? [DEV_PROXY_API_BASE_URL, API_BASE_URL]
+      : [API_BASE_URL]
 
   try {
     const current = new URL(API_BASE_URL)
@@ -33,10 +36,6 @@ function getCandidateBaseUrls() {
       current.hostname === 'localhost'
 
     if (isLocalHost) {
-      if (typeof window !== 'undefined') {
-        urls.push(DEV_PROXY_API_BASE_URL)
-      }
-
       const fallbackPort = current.port === '8010' ? '8000' : current.port === '8000' ? '8010' : ''
       if (fallbackPort) {
         const fallback = new URL(API_BASE_URL)

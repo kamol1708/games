@@ -10,7 +10,7 @@ export default defineConfig({
     strictPort: false,
     proxy: {
       '/api': {
-        target: 'https://gamehub-fastapi.onrender.com',
+        target: 'http://127.0.0.1:8010',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
