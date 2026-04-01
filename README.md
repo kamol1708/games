@@ -5,14 +5,13 @@ Bu loyiha endi faqat frontend emas, balki local ishlaydigan to'liq `frontend + b
 ## Nimalar bor
 
 - `React + Vite + TypeScript` frontend
-- `Node.js` built-in `http` server asosidagi backend
-- parallel `FastAPI` backend
+- bitta `FastAPI` backend
 - Teacher/Admin auth
 - Persistent user storage
 - Persistent `game-questions` API
 - Billing / premium checkout API
 - Premium status sync
-- Local JSON database (`backend/data`)
+- Local JSON database (`services/backend/data`)
 
 ## API endpointlar
 
@@ -58,7 +57,7 @@ FastAPI:
 
 ```bash
 python3.11 -m venv .venv-fastapi
-./.venv-fastapi/bin/pip install -r backend_fastapi/requirements.txt
+./.venv-fastapi/bin/pip install -r services/backend/requirements.txt
 ```
 
 Ishga tushirish:
@@ -83,10 +82,11 @@ Buni `.env` orqali almashtirish mumkin:
 
 Persistent ma'lumotlar shu yerda saqlanadi:
 
-- `backend/data/users.json`
-- `backend/data/sessions.json`
-- `backend/data/game-questions.json`
-- `backend/data/subscriptions.json`
+- `services/backend/data/users.json`
+- `services/backend/data/sessions.json`
+- `services/backend/data/game-questions.json`
+- `services/backend/data/subscriptions.json`
+- `services/backend/data/game-feedback.json`
 
 ## Frontend-backend ulanishi
 
@@ -97,7 +97,7 @@ Frontend default `VITE_API_BASE_URL=http://127.0.0.1:8010` bilan ishlaydi. Teach
 ### Backend: Render
 
 - Config: `render.yaml`
-- Root dir: `backend_fastapi`
+- Root dir: `services/backend`
 - Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 
 Render env vars:
@@ -126,4 +126,5 @@ Vercel env var:
 
 - Bu local/full-stack dev versiya.
 - Database hozir JSON file asosida.
+- Eski Node backend arxivga olingan: `legacy/backends/node-api`
 - Production uchun keyingi qadam: PostgreSQL, JWT refresh rotation, rate limiting, validation layer, webhook payment, password reset, audit log.

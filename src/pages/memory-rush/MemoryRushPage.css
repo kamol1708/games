@@ -12,13 +12,17 @@
 }
 
 .mr-shell {
-  max-width: 1100px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
   border: 1px solid #1d5c83;
   border-radius: 24px;
-  padding: 14px;
+  padding: 18px;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(6px);
+  min-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
 }
 
 .mr-head {
@@ -34,7 +38,8 @@
 
 .mr-head button,
 .mr-start,
-.mr-levels button {
+.mr-levels button,
+.mr-mode-switch button {
   border: none;
   border-radius: 12px;
   font-family: inherit;
@@ -59,16 +64,51 @@
   gap: 8px;
 }
 
-.mr-levels button {
+.mr-levels button,
+.mr-mode-switch button {
   min-height: 40px;
   padding: 0 14px;
   background: rgba(255, 255, 255, 0.16);
   color: #e9f7ff;
 }
 
-.mr-levels button.active {
+.mr-levels button.active,
+.mr-mode-switch button.active {
   background: linear-gradient(90deg, #0ea5e9, #0284c7);
   color: #fff;
+}
+
+.mr-mode-switch {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.mr-team-form {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mr-team-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.mr-team-form span {
+  color: #d4ecfb;
+  font-size: 0.95rem;
+}
+
+.mr-team-form input {
+  min-height: 44px;
+  border: 1px solid #2a6c97;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 0 12px;
+  font: inherit;
 }
 
 .mr-start {
@@ -77,6 +117,54 @@
   padding: 0 16px;
   background: linear-gradient(90deg, #f59e0b, #f97316);
   color: #fff;
+}
+
+.mr-secondary {
+  background: linear-gradient(90deg, #2563eb, #0ea5e9);
+}
+
+.mr-room {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.mr-room-card {
+  border: 1px solid #2a6c97;
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mr-room-title {
+  margin: 0 0 10px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.mr-room-code {
+  margin: 0 0 10px;
+  font-size: 2rem;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  color: #ffd166;
+}
+
+.mr-room-input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #2a6c97;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 0 12px;
+  font: inherit;
+}
+
+.mr-connection-note {
+  margin: 12px 0 0;
+  color: #d4ecfb;
 }
 
 .mr-stats {
@@ -128,10 +216,52 @@
   font-weight: 700;
 }
 
+.mr-players {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mr-player {
+  border: 1px solid #2a6c97;
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mr-player.active {
+  border-color: #ffd166;
+  background: rgba(255, 209, 102, 0.16);
+  box-shadow: 0 0 0 1px rgba(255, 209, 102, 0.26) inset;
+}
+
+.mr-player p,
+.mr-player strong,
+.mr-player span {
+  display: block;
+}
+
+.mr-player p {
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+
+.mr-player strong {
+  font-size: 1.1rem;
+}
+
+.mr-player span {
+  margin-top: 4px;
+  color: #d4ecfb;
+}
+
 .mr-grid {
   margin-top: 10px;
   display: grid;
   gap: 8px;
+  flex: 1;
+  align-content: stretch;
 }
 
 .mr-grid.easy {
@@ -147,14 +277,14 @@
 }
 
 .mr-card {
-  min-height: 68px;
+  min-height: clamp(110px, 18vh, 180px);
   border: none;
   border-radius: 12px;
   background:
     radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.32) 0%, transparent 46%),
     linear-gradient(180deg, #0ea5e9, #0369a1);
   color: #fff;
-  font-size: 1.45rem;
+  font-size: clamp(2rem, 4vw, 3.2rem);
   cursor: pointer;
   transition: transform 0.15s ease;
 }
@@ -193,6 +323,15 @@
 }
 
 @media (max-width: 680px) {
+  .mr-mode-switch,
+  .mr-levels,
+  .mr-team-form,
+  .mr-players,
+  .mr-room {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
   .mr-stats {
     grid-template-columns: 1fr;
   }
@@ -206,5 +345,15 @@
   .mr-grid.medium,
   .mr-grid.hard {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mr-shell {
+    min-height: calc(100vh - 24px);
+    padding: 12px;
+  }
+
+  .mr-card {
+    min-height: 88px;
+    font-size: 1.8rem;
   }
 }

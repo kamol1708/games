@@ -1,4 +1,4 @@
-import ClassroomTeamQuizApp from '../classroom-team-quiz/App'
+import ClassroomTeamQuizApp from '../features/classroom-team-quiz'
 
 type Props = {
   onBack?: () => void

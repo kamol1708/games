@@ -2,11 +2,13 @@ services:
   - type: web
     name: gamehub-fastapi
     runtime: python
-    rootDir: backend_fastapi
+    rootDir: services/backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     autoDeploy: true
     envVars:
+      - key: DATABASE_URL
+        sync: false
       - key: PYTHON_VERSION
         value: 3.11.11
       - key: CLIENT_ORIGINS

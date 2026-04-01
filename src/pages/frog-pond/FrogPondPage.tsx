@@ -255,25 +255,6 @@ function pickAiPadIndex(options: number[], blockedIndex?: number | null) {
   return source[Math.floor(Math.random() * source.length)]
 }
 
-function getAutoAiDifficulty(stats: SubjectPerformanceState, fallback: AiDifficulty) {
-  const totals = Object.values(stats)
-  const answered = totals.reduce((sum, item) => sum + item.total, 0)
-  const correct = totals.reduce((sum, item) => sum + item.correct, 0)
-
-  if (answered < 3) {
-    return fallback
-  }
-
-  const accuracy = correct / answered
-  if (accuracy >= 0.78) {
-    return 'hard'
-  }
-  if (accuracy >= 0.52) {
-    return 'medium'
-  }
-  return 'easy'
-}
-
 function getAiRecommendation(stats: SubjectPerformanceState) {
   const ranked = Object.entries(stats).sort((a, b) => b[1].total - a[1].total)
   const strongest = [...ranked].sort((a, b) => (b[1].correct / Math.max(1, b[1].total)) - (a[1].correct / Math.max(1, a[1].total)))[0]
@@ -431,11 +412,7 @@ function ModeOverlay({
             <strong>Siz vs AI qurbaqa</strong>
             <p>2 ta qurbaqa maydonga tushadi: biri siz, ikkinchisi AI. AI ba'zi savollarda xato qiladi, 3 bosqichning hammasini to‘liq o‘ynaydi.</p>
             <div className="frog-pond-ai-difficulty" onClick={(event) => event.stopPropagation()}>
-              {([
-                ['easy', 'Oson'],
-                ['medium', "O‘rtacha"],
-                ['hard', 'Kuchli'],
-              ] as const).map(([value, label]) => (
+              {([['hard', 'Kuchli']] as const).map(([value, label]) => (
                 <button
                   key={value}
                   type="button"
@@ -528,6 +505,7 @@ export default function FrogPondPage() {
   const navigate = useNavigate()
   const teacherQuestions = useTeacherItems<FrogPondTeacherQuestion>('frog-pond')
   const pageRef = useRef<HTMLElement | null>(null)
+  const autoFullscreenTriedRef = useRef(false)
   const musicRef = useRef<HTMLAudioElement | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const sinkTimeoutRef = useRef<number | null>(null)
@@ -536,7 +514,7 @@ export default function FrogPondPage() {
   const aiAnswerTimeoutRef = useRef<number | null>(null)
   const preventImmediateAiMistakeRef = useRef(false)
   const [gameMode, setGameMode] = useState<GameMode | null>(null)
-  const [aiDifficulty, setAiDifficulty] = useState<AiDifficulty>('medium')
+  const [aiDifficulty, setAiDifficulty] = useState<AiDifficulty>('hard')
   const [stageIndex, setStageIndex] = useState(0)
   const [levels, setLevels] = useState<FrogQuizQuestion[][]>(() => buildLevels(0, teacherQuestions))
   const [currentFrog, setCurrentFrog] = useState<FrogId>('frogA')
@@ -583,6 +561,34 @@ export default function FrogPondPage() {
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return
 
+    const requestPageFullscreen = () => {
+      if (document.fullscreenElement || autoFullscreenTriedRef.current) return
+      autoFullscreenTriedRef.current = true
+      void pageRef.current?.requestFullscreen?.().catch(() => {
+        autoFullscreenTriedRef.current = false
+      })
+    }
+
+    requestPageFullscreen()
+
+    const retryAutoFullscreen = () => {
+      requestPageFullscreen()
+    }
+
+    window.addEventListener('pointerdown', retryAutoFullscreen, { once: true })
+    return () => window.removeEventListener('pointerdown', retryAutoFullscreen)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return
+
+    const requestPageFullscreen = () => {
+      autoFullscreenTriedRef.current = true
+      void pageRef.current?.requestFullscreen?.().catch(() => {
+        autoFullscreenTriedRef.current = false
+      })
+    }
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat || event.key.toLowerCase() !== 'f') return
 
@@ -597,7 +603,7 @@ export default function FrogPondPage() {
         return
       }
 
-      void pageRef.current?.requestFullscreen?.().catch(() => {})
+      requestPageFullscreen()
     }
 
     window.addEventListener('keydown', onKeyDown)
@@ -632,7 +638,7 @@ export default function FrogPondPage() {
   const isFrogStageComplete = (frogId: FrogId) => frogStates[frogId].completedJumps.length >= LEVEL_COUNT
   const currentLilyPadSprite = stageIndex === 2 ? stageThreeLilyPadSprite : stageIndex === 1 ? stageTwoLilyPadSprite : lilyPadSprite
   const currentFrogSprite = stageIndex === 2 ? stageThreeFrogSprite : frogSprite
-  const effectiveAiDifficulty = getAutoAiDifficulty(subjectPerformance, aiDifficulty)
+  const effectiveAiDifficulty: AiDifficulty = 'hard'
   const aiRecommendation = getAiRecommendation(subjectPerformance)
 
   const toggleMute = () => {
@@ -1144,7 +1150,7 @@ export default function FrogPondPage() {
       const forceCorrect = aiDifficulty === 'hard' && preventImmediateAiMistakeRef.current
       preventImmediateAiMistakeRef.current = false
       handleAnswer(chooseAiAnswer(activeQuestion.question, stageIndex, activeQuestion.levelIndex, effectiveAiDifficulty, forceCorrect))
-    }, 140 + Math.floor(Math.random() * 160))
+    }, 2000)
 
     return () => clearAiAnswerTimeout()
   }, [gameMode, status, activeQuestion, stageIndex, effectiveAiDifficulty])
@@ -1383,7 +1389,7 @@ export default function FrogPondPage() {
                 {gameMode === 'ai' ? (
                   <div className="frog-pond-board-pill">
                     <span>AI daraja</span>
-                    <strong>{effectiveAiDifficulty === 'easy' ? 'Oson' : effectiveAiDifficulty === 'hard' ? 'Kuchli' : "O‘rtacha"}</strong>
+                    <strong>Kuchli</strong>
                     <small>{aiRecommendation}</small>
                   </div>
                 ) : null}

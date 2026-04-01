@@ -481,7 +481,7 @@
   position: relative;
   width: 100%;
   justify-items: stretch;
-  align-items: center;
+  align-items: start;
   background: transparent;
   backdrop-filter: none;
   pointer-events: auto;
@@ -491,6 +491,7 @@
   width: 100%;
   max-width: 390px;
   min-height: 500px;
+  margin-top: 132px;
   border-radius: 34px;
   padding: 20px 22px;
   background:
@@ -998,6 +999,10 @@
 
   .frog-pond-modal-backdrop {
     justify-items: center;
+  }
+
+  .frog-pond-modal {
+    margin-top: 116px;
   }
 
   .frog-pond-answer-grid {

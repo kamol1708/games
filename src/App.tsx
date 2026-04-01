@@ -34,12 +34,18 @@ import FrogPondPage from './pages/frog-pond/FrogPondPage'
 import GameFeedbackDock from './components/GameFeedbackDock'
 import TeacherFeedbackInbox from './components/TeacherFeedbackInbox'
 import TeacherQuestionAdmin from './components/TeacherQuestionAdmin'
-import memoryRushCover from './assets/memoryrush-cover-new.webp'
+import memoryRushCover from './assets/left-right-brain-scaled-1.jpg'
 import treasureHuntCover from './assets/15-single-default.jpg'
 import footballChallengeCover from './assets/football-challenge-cover.png'
 import tugOfWarCover from './assets/cute-man-playing-tug-war-indonesian-independence-day-cartoon-vector-icon-illustration-people_138676-8733.avif'
 import wheelOfFortuneCover from './assets/wheel-of-fortune-cover.webp'
 import flagRaceCover from './assets/word-search-cover.webp'
+import flagPlayerRaceCover from './assets/footballrace.jpg'
+import bilimPoyezdiCover from './assets/train.jpg'
+import marioMathCover from './assets/marioball.png'
+import monopolyBoardCover from './assets/JerseyCity-Monopoly-EN-USA-Board.jpg'
+import learningHubCover from './assets/learninghub.png'
+import pacmanCover from './assets/pacman.jpg'
 import wordSearchCover from './assets/word-search-cover.jpg'
 import bumbuzzleCover from './assets/baamboozle.png'
 import jungleBoardCover from './assets/jungle-board-cover.png'
@@ -47,16 +53,17 @@ import classroomTeamQuizCover from './assets/classroom-team-quiz-cover.webp'
 import kimMillionerCover from './assets/kim-millioner-cover.jpg'
 import imageQuizCover from './assets/360_F_290390054_92MXhhVdHu46JuZnl3xK9e7w2jlv33O3.jpg'
 import jumperFrogThumbnail from './assets/jumperfrog_thumbnail.avif'
-import monopoly from './assets/monomap.jpg'
+import quizBattlePromoCover from './assets/Quiz_Battle_Promo.jpg'
 import { cn } from './lib/utils'
 import {
   getAuthSession,
   getRegisteredStudents,
   getRegisteredTeachers,
   isTeacherAuthenticated,
-  isUserAuthenticated,
+  loginStudent,
   loginTeacher,
   logout,
+  registerStudent,
   registerTeacher,
 } from './lib/localAuth'
 import { getTeacherContentStore, syncAllTeacherContentFromBackend } from './lib/teacherContent'
@@ -420,6 +427,44 @@ const appUiStyles = `
 
   .sub-link:hover { text-decoration: underline; }
 
+  .role-switch {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 6px 0 6px;
+  }
+
+  .role-switch-btn {
+    border: 1px solid rgba(37, 49, 81, 0.10);
+    border-radius: 16px;
+    background: rgba(255,255,255,0.78);
+    color: #44506b;
+    padding: 12px 14px;
+    text-align: left;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, background .18s ease;
+  }
+
+  .role-switch-btn strong {
+    display: block;
+    font-size: 14px;
+    color: #24304d;
+  }
+
+  .role-switch-btn span {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--arcade-muted);
+    line-height: 1.35;
+  }
+
+  .role-switch-btn.active {
+    border-color: rgba(255, 147, 87, 0.24);
+    background: linear-gradient(180deg, rgba(255, 223, 184, 0.95), rgba(255,255,255,0.92));
+    box-shadow: 0 12px 24px rgba(255, 151, 92, 0.12);
+    transform: translateY(-1px);
+  }
+
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -636,22 +681,6 @@ function isPremiumLockedPath(path: string) {
   return PREMIUM_LOCKED_GAMES.has(path)
 }
 
-function AnyUserGameGuard({ children }: PropsWithChildren) {
-  const location = useLocation()
-  if (isUserAuthenticated()) return <>{children}</>
-
-  return (
-    <Navigate
-      to="/games"
-      replace
-      state={{
-        authRequiredModal: true,
-        authRequiredFrom: location.pathname,
-      }}
-    />
-  )
-}
-
 function AppUiStyleTag() {
   return <style>{appUiStyles}</style>
 }
@@ -809,38 +838,64 @@ function GameLayout() {
 function LoginForm() {
   const navigate = useNavigate()
   const location = useLocation()
+  const params = new URLSearchParams(location.search)
+  const initialRole = params.get('role') === 'student' ? 'student' : 'teacher'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [selectedRole, setSelectedRole] = useState<'teacher' | 'student'>(initialRole)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/admin'
 
+  const handleRoleChange = (role: 'teacher' | 'student') => {
+    setSelectedRole(role)
+    const next = new URLSearchParams(location.search)
+    next.set('role', role)
+    navigate(`/login?${next.toString()}`, { replace: true, state: location.state })
+  }
+
   const handleLogin = async () => {
     setIsSubmitting(true)
-    const result = await loginTeacher({ email, password })
+    const result = selectedRole === 'student'
+      ? await loginStudent({ email, password })
+      : await loginTeacher({ email, password })
     if (!result.ok) {
-      setError(result.message)
+      setError(result.message ?? "Kirishda xatolik.")
       setIsSubmitting(false)
       return
     }
-    try {
-      await syncAllTeacherContentFromBackend()
-    } catch {
-      // keep app usable even if question sync fails
+    if (selectedRole === 'teacher') {
+      try {
+        await syncAllTeacherContentFromBackend()
+      } catch {
+        // keep app usable even if question sync fails
+      }
     }
     setError('')
-    navigate(from, { replace: true })
+    navigate(selectedRole === 'student' ? '/games' : from, { replace: true })
     setIsSubmitting(false)
   }
 
   return (
     <div className="auth-grid">
-      <p className="eyebrow">Teacher/Admin Kirishi</p>
-      <h2 className="auth-title">Teacher Login</h2>
+      <p className="eyebrow">Kirish</p>
+      <h2 className="auth-title">{selectedRole === 'teacher' ? 'Teacher Login' : 'Student Login'}</h2>
       <p className="auth-note">
-        Teacher panelga kirib barcha o'yinlarga savol qo'shing.
+        {selectedRole === 'teacher'
+          ? "Teacher panelga kirib barcha o'yinlarga savol qo'shing."
+          : "O'quvchi sifatida kirib o'yinlar va dars tajribasidan foydalaning."}
       </p>
+      <div className="role-switch">
+        <button type="button" className={`role-switch-btn${selectedRole === 'teacher' ? ' active' : ''}`} onClick={() => handleRoleChange('teacher')}>
+          <strong>O‘qituvchi bo‘lib kirish</strong>
+          <span>Teacher panel va boshqaruv vositalari</span>
+        </button>
+        <button type="button" className={`role-switch-btn${selectedRole === 'student' ? ' active' : ''}`} onClick={() => handleRoleChange('student')}>
+          <strong>O‘quvchi bo‘lib kirish</strong>
+          <span>O‘yinlar va o‘quvchi akkaunti</span>
+        </button>
+      </div>
       <input className="field" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
       <input
         className="field"
@@ -854,7 +909,7 @@ function LoginForm() {
         {isSubmitting ? 'Kirilmoqda...' : 'Kirish'}
       </button>
       <p className="auth-note" style={{ marginTop: 2 }}>
-        Akkaunt yo&apos;qmi? <Link className="sub-link" to="/register">Ro&apos;yxatdan o&apos;tish</Link>
+        Akkaunt yo&apos;qmi? <Link className="sub-link" to={`/register?role=${selectedRole}`}>Ro&apos;yxatdan o&apos;tish</Link>
       </p>
     </div>
   )
@@ -862,37 +917,64 @@ function LoginForm() {
 
 function Register() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const params = new URLSearchParams(location.search)
+  const initialRole = params.get('role') === 'student' ? 'student' : 'teacher'
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [selectedRole, setSelectedRole] = useState<'teacher' | 'student'>(initialRole)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const handleRoleChange = (role: 'teacher' | 'student') => {
+    setSelectedRole(role)
+    const next = new URLSearchParams(location.search)
+    next.set('role', role)
+    navigate(`/register?${next.toString()}`, { replace: true })
+  }
+
   const handleRegister = async () => {
     setIsSubmitting(true)
-    const result = await registerTeacher({ fullName, email, password })
+    const result = selectedRole === 'student'
+      ? await registerStudent({ fullName, email, password })
+      : await registerTeacher({ fullName, email, password })
     if (!result.ok) {
-      setError(result.message)
+      setError(result.message ?? "Ro'yxatdan o'tishda xatolik.")
       setIsSubmitting(false)
       return
     }
-    try {
-      await syncAllTeacherContentFromBackend()
-    } catch {
-      // keep app usable even if question sync fails
+    if (selectedRole === 'teacher') {
+      try {
+        await syncAllTeacherContentFromBackend()
+      } catch {
+        // keep app usable even if question sync fails
+      }
     }
     setError('')
-    navigate('/admin', { replace: true })
+    navigate(selectedRole === 'student' ? '/games' : '/admin', { replace: true })
     setIsSubmitting(false)
   }
 
   return (
     <div className="auth-grid">
-      <p className="eyebrow">Teacher Account</p>
-      <h2 className="auth-title">Register Teacher</h2>
+      <p className="eyebrow">Ro‘yxatdan o‘tish</p>
+      <h2 className="auth-title">{selectedRole === 'teacher' ? 'Register Teacher' : 'Register Student'}</h2>
       <p className="auth-note">
-        {"Ro'yxatdan o'tsangiz akkaunt avtomatik teacher rolida ochiladi."}
+        {selectedRole === 'teacher'
+          ? "Ro'yxatdan o'tsangiz akkaunt teacher rolida ochiladi."
+          : "Ro'yxatdan o'tsangiz akkaunt o'quvchi rolida ochiladi."}
       </p>
+      <div className="role-switch">
+        <button type="button" className={`role-switch-btn${selectedRole === 'teacher' ? ' active' : ''}`} onClick={() => handleRoleChange('teacher')}>
+          <strong>O‘qituvchi bo‘lib kirish</strong>
+          <span>Teacher panel uchun akkaunt</span>
+        </button>
+        <button type="button" className={`role-switch-btn${selectedRole === 'student' ? ' active' : ''}`} onClick={() => handleRoleChange('student')}>
+          <strong>O‘quvchi bo‘lib kirish</strong>
+          <span>O‘yinlar uchun o‘quvchi akkaunti</span>
+        </button>
+      </div>
       <input
         className="field"
         type="text"
@@ -910,10 +992,10 @@ function Register() {
       />
       {error ? <p className="auth-note" style={{ color: '#ff8f8f', marginTop: -4 }}>{error}</p> : null}
       <button className="pill-btn" type="button" onClick={() => void handleRegister()} disabled={isSubmitting}>
-        {isSubmitting ? 'Yaratilmoqda...' : "Teacher akkaunt yaratish"}
+        {isSubmitting ? 'Yaratilmoqda...' : selectedRole === 'teacher' ? "Teacher akkaunt yaratish" : "O'quvchi akkaunt yaratish"}
       </button>
       <p className="auth-note" style={{ marginTop: 2 }}>
-        Akkaunt bormi? <Link className="sub-link" to="/login">Kirish</Link>
+        Akkaunt bormi? <Link className="sub-link" to={`/login?role=${selectedRole}`}>Kirish</Link>
       </p>
     </div>
   )
@@ -1409,18 +1491,12 @@ function GameCard({
 
 function Games() {
   const location = useLocation()
-  const authRedirectTarget =
-    (location.state as { authRequiredFrom?: string } | null)?.authRequiredFrom ?? '/games'
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => isUserAuthenticated())
   const [premiumUnlocked, setPremiumUnlocked] = useState<boolean>(() => hasPremiumSubscription())
   const [showPremiumModal, setShowPremiumModal] = useState(false)
-  const [showAuthModal, setShowAuthModal] = useState(false)
 
   useEffect(() => {
-    setIsLoggedIn(isUserAuthenticated())
     setPremiumUnlocked(hasPremiumSubscription())
     const sync = () => {
-      setIsLoggedIn(isUserAuthenticated())
       setPremiumUnlocked(hasPremiumSubscription())
     }
     const unsubscribePremium = subscribeToPremium(sync)
@@ -1438,9 +1514,6 @@ function Games() {
     if ((location.state as { premiumLockedModal?: boolean } | null)?.premiumLockedModal) {
       setShowPremiumModal(true)
     }
-    if ((location.state as { authRequiredModal?: boolean } | null)?.authRequiredModal) {
-      setShowAuthModal(true)
-    }
   }, [location.state])
 
   const games: GameCardProps[] = [
@@ -1449,6 +1522,7 @@ function Games() {
       title: 'Quiz Battle',
       badge: 'Knowledge',
       icon: '🧠',
+      cover: quizBattlePromoCover,
       text: "Jamoaviy savol-javob o'yini. Tez fikrlang, combo qiling va yuqori ball to'plang.",
     },
     {
@@ -1472,6 +1546,7 @@ function Games() {
       title: 'Memory Rush',
       badge: 'Focus',
       icon: '✨',
+      cover: memoryRushCover,
       text: "Kartalarni yodlab juftliklarni toping. Vaqt va hayotlar tugamasidan rekord yangilang.",
     },
     {
@@ -1527,6 +1602,7 @@ function Games() {
       title: 'Flag Player Race',
       badge: 'Football',
       icon: '🌍',
+      cover: flagPlayerRaceCover,
       text: "Davlat bayrog'iga mos futbolchini toping. Sport va geografiya bir o'yinda.",
     },
     {
@@ -1534,6 +1610,7 @@ function Games() {
       title: 'Bilim Poyezdi',
       badge: 'Team Quiz',
       icon: '🚂',
+      cover: bilimPoyezdiCover,
       text: "2-6 jamoa bilan stansiyalar bo'ylab bilim poygasi. Track tanlang, savolga javob bering va poyezdni finishga olib boring.",
     },
     {
@@ -1541,6 +1618,7 @@ function Games() {
       title: 'Mario Math Platformer',
       badge: 'Phaser 3',
       icon: '🕹️',
+      cover: marioMathCover,
       text: "Mario-style platformer va matematika quiz overlay. Quiz Block va Gate savollari bilan leveldan o'ting.",
     },
     {
@@ -1564,6 +1642,7 @@ function Games() {
       title: 'Pac Grid Arcade',
       badge: 'Arcade',
       icon: '🟡',
+      cover: pacmanCover,
       text: "Classic maze-chase uslubidagi Pac game: grid movement, ghost chase, pellet va touch/swipe boshqaruv.",
     },
     {
@@ -1587,7 +1666,7 @@ function Games() {
       title: 'School City Monopoly',
       badge: '2 Team Board Game',
       icon: '🎲',
-      cover: monopoly,
+      cover: monopolyBoardCover,
       text: "Eng kuchli ta'limiy monopoly: 2 jamoa school city board bo'ylab yuradi, fan hududlarini egallaydi va bilim coin bilan g'oliblikka chiqadi.",
     },
     {
@@ -1595,6 +1674,7 @@ function Games() {
       title: 'Learning Hub',
       badge: 'All-in-One',
       icon: '📚',
+      cover: learningHubCover,
       text: "Oldingi learning sahifa ichidagi barcha o'yinlar katalogi va tanlash ekrani.",
     },
   ]
@@ -1605,114 +1685,68 @@ function Games() {
       <div className="pointer-events-none absolute right-6 top-8 h-44 w-44 rounded-full bg-blue-500/20 blur-[90px]" />
       <div className="pointer-events-none absolute bottom-20 left-1/3 h-36 w-36 rounded-full bg-cyan-400/10 blur-[90px]" />
 
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 via-white/[0.03] to-transparent p-6 shadow-[0_20px_70px_rgba(2,8,23,0.45)] backdrop-blur-xl sm:p-8">
-        <div className="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_20%_20%,white_0.8px,transparent_1px)] [background-size:14px_14px]" />
+      <div className="relative overflow-hidden rounded-[1.8rem] border border-white/[0.09] bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.12),transparent_30%),radial-gradient(circle_at_top_right,rgba(56,189,248,0.08),transparent_28%),linear-gradient(180deg,rgba(18,20,30,0.96),rgba(8,10,18,0.96))] px-4 py-4 shadow-[0_20px_70px_rgba(2,8,23,0.46)] backdrop-blur-xl sm:px-5 sm:py-5 lg:px-6 lg:py-5">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle,rgba(255,255,255,0.75)_1px,transparent_1.2px)] [background-size:23px_23px]" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-[34%] bg-gradient-to-r from-violet-400/12 via-violet-400/6 to-transparent blur-3xl" />
 
-        <div className="relative flex flex-wrap items-center justify-between gap-4">
+        <div className="relative max-w-[38rem] lg:max-w-[40rem]">
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-white/55">Game Hub</p>
-            <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.34em] text-white/42 sm:text-xs">Game Hub</p>
+            <h2 className="max-w-[10ch] text-[clamp(1.7rem,2.7vw,2.7rem)] font-semibold leading-[1.02] tracking-[-0.05em] text-white">
               Playgroundga Xush Kelibsiz
             </h2>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65 sm:text-base">
+            <p className="mt-3 max-w-[35rem] text-[0.84rem] leading-[1.58] text-white/62 sm:text-[0.9rem] sm:leading-[1.62]">
               O&apos;yinlarni buzmasdan faqat dizayn yangilandi: premium dark, glow effektlar va glass kartalar bilan
               tanlash sahifasi. Quyidagi o&apos;yinlardan birini tanlab darhol boshlashingiz mumkin.
             </p>
           </div>
 
-          <div className="grid w-full gap-3 sm:w-auto sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur">
-              <p className="text-xs uppercase tracking-[0.14em] text-white/45">Games</p>
-              <p className="mt-1 text-lg font-semibold text-white">{games.length}</p>
+          <div className="mt-4 grid max-w-[32rem] gap-2.5 sm:grid-cols-3">
+            <div className="min-h-[4.4rem] rounded-[1.05rem] border border-white/[0.09] bg-white/[0.05] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white/38">Games</p>
+              <p className="mt-1 text-[1.18rem] font-semibold text-white">{games.length}</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur">
-              <p className="text-xs uppercase tracking-[0.14em] text-white/45">Mode</p>
-              <p className="mt-1 text-lg font-semibold text-white">Fast Play</p>
+            <div className="min-h-[4.4rem] rounded-[1.05rem] border border-white/[0.09] bg-white/[0.05] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white/38">Mode</p>
+              <p className="mt-1 text-[1.18rem] font-semibold text-white">Fast Play</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur">
-              <p className="text-xs uppercase tracking-[0.14em] text-white/45">Device</p>
-              <p className="mt-1 text-lg font-semibold text-white">Mobile Ready</p>
+            <div className="min-h-[4.4rem] rounded-[1.05rem] border border-white/[0.09] bg-white/[0.05] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white/38">Device</p>
+              <p className="mt-1 text-[1.18rem] font-semibold text-white">Mobile Ready</p>
             </div>
           </div>
-        </div>
 
-        <div className="relative mt-6 flex flex-wrap gap-2">
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70">
-            {games.length} ta game tayyor
-          </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70">
-            Fast play mode
-          </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70">
-            Mobile friendly
-          </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70">
-            Classroom ready
-          </span>
+          <div className="relative mt-3.5 flex flex-wrap gap-2">
+            <span className="rounded-full border border-white/[0.09] bg-white/[0.04] px-3 py-1.5 text-[0.77rem] font-medium text-white/62">
+              {games.length} ta game tayyor
+            </span>
+            <span className="rounded-full border border-white/[0.09] bg-white/[0.04] px-3 py-1.5 text-[0.77rem] font-medium text-white/62">
+              Fast play mode
+            </span>
+            <span className="rounded-full border border-white/[0.09] bg-white/[0.04] px-3 py-1.5 text-[0.77rem] font-medium text-white/62">
+              Mobile friendly
+            </span>
+            <span className="rounded-full border border-white/[0.09] bg-white/[0.04] px-3 py-1.5 text-[0.77rem] font-medium text-white/62">
+              Classroom ready
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {games.map((game) => {
-          const authLocked = !isLoggedIn
           const premiumLocked = isPremiumLockedPath(game.to) && !premiumUnlocked
-          const locked = authLocked || premiumLocked
-          const lockKind = authLocked ? 'auth' : 'premium'
           return (
             <GameCard
               key={game.to}
               {...game}
-              locked={locked}
-              lockKind={lockKind}
-              onLockedClick={() => (authLocked ? setShowAuthModal(true) : setShowPremiumModal(true))}
+              locked={premiumLocked}
+              lockKind="premium"
+              onLockedClick={() => setShowPremiumModal(true)}
             />
           )
         })}
       </div>
-
-      {showAuthModal ? (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" role="presentation">
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="auth-lock-title"
-            className="w-full max-w-md rounded-3xl border border-white/15 bg-[#0b0f18]/95 p-6 text-white shadow-[0_24px_70px_rgba(2,8,23,0.65)] backdrop-blur-xl"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-200/80">Kirish talab qilinadi</p>
-            <h3 id="auth-lock-title" className="mt-2 text-2xl font-semibold tracking-tight">
-              Iltimos, o‘ynash uchun birinchi ro‘yxatdan o‘ting
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-white/70">
-              O‘yinlarni boshlashdan oldin akkaunt bilan kiring. Ro‘yxatdan o‘tsangiz akkaunt avtomatik teacher rolida ochiladi.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <Link
-                to="/register"
-                state={{ from: { pathname: authRedirectTarget } }}
-                className="shine-button inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-violet-500 px-4 py-2.5 text-sm font-semibold text-white"
-                onClick={() => setShowAuthModal(false)}
-              >
-                Ro‘yxatdan o‘tish
-              </Link>
-              <Link
-                to="/login"
-                state={{ from: { pathname: authRedirectTarget } }}
-                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10"
-                onClick={() => setShowAuthModal(false)}
-              >
-                Kirish
-              </Link>
-              <button
-                type="button"
-                onClick={() => setShowAuthModal(false)}
-                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10"
-              >
-                Yopish
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
 
       {showPremiumModal ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" role="presentation">
@@ -1930,169 +1964,129 @@ function App() {
           <Route
             path="/games/quiz-battle"
             element={
-              <AnyUserGameGuard>
-                <QuizBattleRoute />
-              </AnyUserGameGuard>
+              <QuizBattleRoute />
             }
           />
           <Route
             path="/games/treasure-hunt"
             element={
-              <AnyUserGameGuard>
-                <TreasureHuntRoute />
-              </AnyUserGameGuard>
+              <TreasureHuntRoute />
             }
           />
           <Route
             path="/games/memory-rush"
             element={
-              <AnyUserGameGuard>
-                <PremiumLockedGameGuard>
-                  <MemoryRushRoute />
-                </PremiumLockedGameGuard>
-              </AnyUserGameGuard>
+              <PremiumLockedGameGuard>
+                <MemoryRushRoute />
+              </PremiumLockedGameGuard>
             }
           />
           <Route
             path="/games/football-challenge"
             element={
-              <AnyUserGameGuard>
-                <FootballRoute />
-              </AnyUserGameGuard>
+              <FootballRoute />
             }
           />
           <Route
             path="/games/tug-of-war"
             element={
-              <AnyUserGameGuard>
-                <PremiumLockedGameGuard>
-                  <TugOfWarRoute />
-                </PremiumLockedGameGuard>
-              </AnyUserGameGuard>
+              <PremiumLockedGameGuard>
+                <TugOfWarRoute />
+              </PremiumLockedGameGuard>
             }
           />
           <Route
             path="/games/frog-pond"
             element={
-              <AnyUserGameGuard>
-                <FrogPondRoute />
-              </AnyUserGameGuard>
+              <FrogPondRoute />
             }
           />
           <Route
             path="/games/image-quiz"
             element={
-              <AnyUserGameGuard>
-                <ImageQuizRoute />
-              </AnyUserGameGuard>
+              <ImageQuizRoute />
             }
           />
           <Route
             path="/games/word-search"
             element={
-              <AnyUserGameGuard>
-                <PremiumLockedGameGuard>
-                  <WordSearchRoute />
-                </PremiumLockedGameGuard>
-              </AnyUserGameGuard>
+              <PremiumLockedGameGuard>
+                <WordSearchRoute />
+              </PremiumLockedGameGuard>
             }
           />
           <Route
             path="/games/wheel-of-fortune"
             element={
-              <AnyUserGameGuard>
-                <WheelOfFortuneRoute />
-              </AnyUserGameGuard>
+              <WheelOfFortuneRoute />
             }
           />
           <Route
             path="/games/flag-race"
             element={
-              <AnyUserGameGuard>
-                <FlagRaceRoute />
-              </AnyUserGameGuard>
+              <FlagRaceRoute />
             }
           />
           <Route
             path="/games/flag-player-race"
             element={
-              <AnyUserGameGuard>
-                <FlagPlayerRaceRoute />
-              </AnyUserGameGuard>
+              <FlagPlayerRaceRoute />
             }
           />
           <Route
             path="/games/bilim-poyezdi"
             element={
-              <AnyUserGameGuard>
-                <PremiumLockedGameGuard>
-                  <BilimPoyezdiRoute />
-                </PremiumLockedGameGuard>
-              </AnyUserGameGuard>
+              <PremiumLockedGameGuard>
+                <BilimPoyezdiRoute />
+              </PremiumLockedGameGuard>
             }
           />
           <Route
             path="/games/mario-math-platformer"
             element={
-              <AnyUserGameGuard>
-                <MarioMathPlatformerRoute />
-              </AnyUserGameGuard>
+              <MarioMathPlatformerRoute />
             }
           />
           <Route
             path="/games/bumbuzzle"
             element={
-              <AnyUserGameGuard>
-                <BumbuzzleRoute />
-              </AnyUserGameGuard>
+              <BumbuzzleRoute />
             }
           />
           <Route
             path="/games/jungle-board-3d"
             element={
-              <AnyUserGameGuard>
-                <JungleBoard3DRoute />
-              </AnyUserGameGuard>
+              <JungleBoard3DRoute />
             }
           />
           <Route
             path="/games/pac-grid-arcade"
             element={
-              <AnyUserGameGuard>
-                <PacmanArcadeRoute />
-              </AnyUserGameGuard>
+              <PacmanArcadeRoute />
             }
           />
           <Route
             path="/games/kim-millioner"
             element={
-              <AnyUserGameGuard>
-                <KimMillionerRoute />
-              </AnyUserGameGuard>
+              <KimMillionerRoute />
             }
           />
           <Route
             path="/games/classroom-team-quiz"
             element={
-              <AnyUserGameGuard>
-                <ClassroomTeamQuizRoute />
-              </AnyUserGameGuard>
+              <ClassroomTeamQuizRoute />
             }
           />
           <Route
             path="/games/monopoly-calibration"
             element={
-              <AnyUserGameGuard>
-                <MonopolyCalibrationRoute />
-              </AnyUserGameGuard>
+              <MonopolyCalibrationRoute />
             }
           />
           <Route
             path="/games/learning"
             element={
-              <AnyUserGameGuard>
-                <LearningRoute />
-              </AnyUserGameGuard>
+              <LearningRoute />
             }
           />
         </Route>

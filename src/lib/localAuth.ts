@@ -1,6 +1,6 @@
 import { apiRequest } from './apiClient'
 
-export type LocalUserRole = 'teacher' | 'admin'
+export type LocalUserRole = 'teacher' | 'admin' | 'student'
 
 export type LocalUser = {
   id: string
@@ -74,9 +74,14 @@ function saveUserToCache(user: LocalUser) {
   writeUsersCache(next)
 }
 
+function findCachedUserByEmail(email: string) {
+  return readUsersCache().find((item) => item.email.trim().toLowerCase() === email.trim().toLowerCase())
+}
+
 function detectRole(roles: string[]): LocalUserRole | null {
   if (roles.includes('admin')) return 'admin'
   if (roles.includes('teacher')) return 'teacher'
+  if (roles.includes('student')) return 'student'
   return null
 }
 
@@ -94,6 +99,25 @@ function setSession(session: AuthSession | null) {
     window.localStorage.setItem(SESSION_KEY, JSON.stringify(session))
   }
   window.dispatchEvent(new Event('storage'))
+}
+
+function isNetworkError(error: unknown) {
+  return error instanceof TypeError
+}
+
+function buildLocalSession(user: LocalUser): AuthSession {
+  const session: AuthSession = {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+    roles: [user.role],
+    fullName: user.fullName,
+    accessToken: `local-access-${user.id}`,
+    refreshToken: `local-refresh-${user.id}`,
+  }
+
+  setSession(session)
+  return session
 }
 
 async function fetchCurrentUser(accessToken: string) {
@@ -136,7 +160,7 @@ export function getRegisteredTeachers() {
 }
 
 export function getRegisteredStudents() {
-  return [] as LocalUser[]
+  return readUsersCache().filter((u) => u.role === 'student')
 }
 
 export function getAuthSession(): AuthSession | null {
@@ -178,7 +202,7 @@ export async function registerTeacher(input: { fullName: string; email: string; 
   if (password.length < 4) return { ok: false, message: "Parol kamida 4 ta belgi bo'lsin." }
 
   try {
-    await apiRequest('/users/', {
+    await apiRequest('/users', {
       method: 'POST',
       body: JSON.stringify({
         email,
@@ -187,7 +211,26 @@ export async function registerTeacher(input: { fullName: string; email: string; 
       }),
     })
   } catch (error) {
-    return { ok: false, message: error instanceof Error ? error.message : "Ro'yxatdan o'tishda xatolik." }
+    if (!isNetworkError(error)) {
+      return { ok: false, message: error instanceof Error ? error.message : "Ro'yxatdan o'tishda xatolik." }
+    }
+
+    if (findCachedUserByEmail(email)) {
+      return { ok: false, message: 'Bu email bilan foydalanuvchi mavjud.' }
+    }
+
+    const localUser: LocalUser = {
+      id: `local-${Date.now()}`,
+      fullName,
+      email,
+      password,
+      role: 'teacher',
+      createdAt: Date.now(),
+    }
+
+    saveUserToCache(localUser)
+    const session = buildLocalSession(localUser)
+    return { ok: true, session }
   }
 
   return loginTeacher({ email, password })
@@ -210,16 +253,61 @@ export async function loginTeacher(input: { email: string; password: string }): 
     const session = await buildSession(email, payload)
     return { ok: true, session }
   } catch (error) {
-    return { ok: false, message: error instanceof Error ? error.message : "Kirishda xatolik." }
+    if (!isNetworkError(error)) {
+      return { ok: false, message: error instanceof Error ? error.message : "Kirishda xatolik." }
+    }
+
+    const cachedUser = findCachedUserByEmail(email)
+    if (!cachedUser || cachedUser.password !== password) {
+      return { ok: false, message: "Email yoki parol noto'g'ri." }
+    }
+
+    const session = buildLocalSession(cachedUser)
+    return { ok: true, session }
   }
 }
 
 export async function registerStudent(input: { fullName: string; email: string; password: string }) {
-  return registerTeacher(input)
+  const fullName = input.fullName.trim()
+  const email = input.email.trim().toLowerCase()
+  const password = input.password
+
+  if (!fullName) return { ok: false, message: 'Ism kiriting.' }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, message: "Email noto'g'ri." }
+  if (password.length < 4) return { ok: false, message: "Parol kamida 4 ta belgi bo'lsin." }
+  if (findCachedUserByEmail(email)) {
+    return { ok: false, message: 'Bu email bilan foydalanuvchi mavjud.' }
+  }
+
+  const localUser: LocalUser = {
+    id: `local-student-${Date.now()}`,
+    fullName,
+    email,
+    password,
+    role: 'student',
+    createdAt: Date.now(),
+  }
+
+  saveUserToCache(localUser)
+  const session = buildLocalSession(localUser)
+  return { ok: true, session }
 }
 
 export async function loginStudent(input: { email: string; password: string }) {
-  return loginTeacher(input)
+  const email = input.email.trim().toLowerCase()
+  const password = input.password
+
+  if (!email || !password) {
+    return { ok: false, message: 'Email va parol kiriting.' }
+  }
+
+  const cachedUser = findCachedUserByEmail(email)
+  if (!cachedUser || cachedUser.password !== password || cachedUser.role !== 'student') {
+    return { ok: false, message: "Email yoki parol noto'g'ri." }
+  }
+
+  const session = buildLocalSession(cachedUser)
+  return { ok: true, session }
 }
 
 export function isTeacherAuthenticated() {

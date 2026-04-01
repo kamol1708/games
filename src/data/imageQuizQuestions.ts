@@ -8,6 +8,16 @@ import historyAvicenna from '../assets/images.jpg'
 import historyOppenheimer from '../assets/par196080-teaser-story-big.jpg'
 import historyLeonardo from '../assets/licensed-image-1.jpg'
 import historyBobur from '../assets/Zahiriddin_Muhammad_Bobur.jpg'
+import geographyBarcelona from '../assets/barcelona.jpg'
+import geographyHorseshoeBend from '../assets/horseshoe-bend-1908283_19201.jpg'
+import geographyGoldenGate from '../assets/Golden-Gate-Compressed-scaled.jpeg'
+import geographyKilimanjaro from '../assets/mt-kilimanjaro.jpg'
+import geographyNiagara from '../assets/Niagara-Falls-mist-aerial-bldgs-H_02a801c50_22359.jpg'
+import geographyStBasil from '../assets/st-basil-cathedral_1.jpg'
+import geographySydneyOpera from '../assets/Sydney-Opera-House.jpg'
+import geographyFuji from '../assets/View_of_Mount_Fuji_from_Ōwakudani_20211202.jpg'
+import geographyMachuPicchu from '../assets/WFJBpzs4J5x3uvbeKdnm3i.jpg'
+import geographyTokyoTower from '../assets/tokyotower.jpeg'
 
 export type QuizDifficulty = 'easy' | 'medium' | 'hard'
 
@@ -432,5 +442,105 @@ export const imageQuizQuestions: ImageQuizQuestion[] = [
     category: 'Tarix',
     difficulty: 'hard',
     hint: 'Bu hukmdor va shoir mashhur tarixiy-memuar asari hamda yirik sulolaga asos solgani bilan tanilgan.',
+  },
+  {
+    id: 42,
+    question: 'Rasmda ko‘rsatilgan mashhur inshoot qaysi shahar bilan bog‘liq?',
+    image: geographyBarcelona,
+    options: ['Barcelona', 'Madrid', 'Lisbon', 'Rome'],
+    correctIndex: 0,
+    category: 'Geografiya',
+    difficulty: 'medium',
+    hint: 'Bu inshoot Antoni Gaudi me’morchiligi bilan bog‘liq bo‘lib, Ispaniyaning Kataloniya hududidagi yirik shaharda joylashgan.',
+  },
+  {
+    id: 43,
+    question: 'Rasmda qaysi tabiiy maskan tasvirlangan?',
+    image: geographyHorseshoeBend,
+    options: ['Horseshoe Bend', 'Grand Canyon', 'Bryce Canyon', 'Antelope Canyon'],
+    correctIndex: 0,
+    category: 'Geografiya',
+    difficulty: 'hard',
+    hint: 'Bu joy Kolorado daryosining ot tuyog‘iga o‘xshash keskin burilishi bilan mashhur.',
+  },
+  {
+    id: 44,
+    question: 'Rasmda qaysi mashhur ko‘prik tasvirlangan?',
+    image: geographyGoldenGate,
+    options: ['Golden Gate Bridge', 'Brooklyn Bridge', 'Tower Bridge', 'Sydney Harbour Bridge'],
+    correctIndex: 0,
+    category: 'Geografiya',
+    difficulty: 'easy',
+    hint: 'Bu qizil osma ko‘prik AQShning g‘arbiy qirg‘og‘idagi yirik shaharda joylashgan.',
+  },
+  {
+    id: 45,
+    question: 'Rasmda ko‘rsatilgan ulkan tog‘ qaysi?',
+    image: geographyKilimanjaro,
+    options: ['Kilimanjaro', 'Everest', 'Fuji', 'Elbrus'],
+    correctIndex: 0,
+    category: 'Geografiya',
+    difficulty: 'medium',
+    hint: 'Bu Afrika qit’asidagi eng baland tog‘ bo‘lib, Tanzaniya hududida joylashgan.',
+  },
+  {
+    id: 46,
+    question: 'Rasmda qaysi sharshara tasvirlangan?',
+    image: geographyNiagara,
+    options: ['Niagara Falls', 'Victoria Falls', 'Iguazu Falls', 'Angel Falls'],
+    correctIndex: 0,
+    category: 'Geografiya',
+    difficulty: 'easy',
+    hint: 'Bu mashhur sharshara AQSh va Kanada chegarasi yaqinida joylashgan.',
+  },
+  {
+    id: 47,
+    question: 'Rasmda ko‘rsatilgan rang-barang sobor qaysi?',
+    image: geographyStBasil,
+    options: ['St. Basil’s Cathedral', 'Notre-Dame Cathedral', 'Sagrada Familia', 'St. Peter’s Basilica'],
+    correctIndex: 0,
+    category: 'Geografiya',
+    difficulty: 'medium',
+    hint: 'Bu mashhur pravoslav sobori Moskvaning Qizil maydoni bilan bog‘liq.',
+  },
+  {
+    id: 48,
+    question: 'Rasmda qaysi mashhur bino tasvirlangan?',
+    image: geographySydneyOpera,
+    options: ['Sydney Opera House', 'Burj Al Arab', 'Louvre Abu Dhabi', 'Marina Bay Sands'],
+    correctIndex: 0,
+    category: 'Geografiya',
+    difficulty: 'easy',
+    hint: 'Bu bino Avstraliyaning eng mashhur me’moriy ramzlaridan biri hisoblanadi.',
+  },
+  {
+    id: 49,
+    question: 'Rasmda ko‘rsatilgan tog‘ qaysi?',
+    image: geographyFuji,
+    options: ['Mount Fuji', 'Kilimanjaro', 'Mont Blanc', 'Matterhorn'],
+    correctIndex: 0,
+    category: 'Geografiya',
+    difficulty: 'medium',
+    hint: 'Bu qorli vulqon Yaponiyaning eng mashhur tabiiy ramzlaridan biri hisoblanadi.',
+  },
+  {
+    id: 50,
+    question: 'Rasmda ko‘rsatilgan qadimiy tarixiy majmua qaysi?',
+    image: geographyMachuPicchu,
+    options: ['Machu Picchu', 'Petra', 'Chichen Itza', 'Teotihuacan'],
+    correctIndex: 0,
+    category: 'Geografiya',
+    difficulty: 'hard',
+    hint: 'Bu inka shahri Peru tog‘lari orasida joylashgan va dunyoning yangi yetti mo‘jizasidan biridir.',
+  },
+  {
+    id: 51,
+    question: 'Rasmda ko‘rsatilgan minora qaysi?',
+    image: geographyTokyoTower,
+    options: ['Tokyo Tower', 'CN Tower', 'Eiffel Tower', 'Tokyo Skytree'],
+    correctIndex: 0,
+    category: 'Geografiya',
+    difficulty: 'medium',
+    hint: 'Bu qizil-oq rangli minora Yaponiyaning poytaxtidagi mashhur telekommunikatsiya inshootlaridan biridir.',
   },
 ]

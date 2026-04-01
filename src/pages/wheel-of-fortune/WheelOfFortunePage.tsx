@@ -6,6 +6,7 @@ type QuestionLevel = 'easy' | 'medium' | 'hard'
 
 type Question = {
   text: string
+  answer: string
   level: QuestionLevel
   points: number
   seconds: number
@@ -18,15 +19,15 @@ type WheelOfFortunePageProps = {
 const STUDENT_SPIN_MS = 4200
 
 const questionBank: Question[] = [
-  { text: "9 + 7 = ?", level: 'easy', points: 5, seconds: 120 },
-  { text: "24 / 6 + 3 = ?", level: 'easy', points: 5, seconds: 120 },
-  { text: "O'zbekiston poytaxti qaysi shahar?", level: 'easy', points: 5, seconds: 120 },
-  { text: "15 * 4 - 18 = ?", level: 'medium', points: 10, seconds: 120 },
-  { text: "3 ta sinonim so'z ayting.", level: 'medium', points: 10, seconds: 120 },
-  { text: '2, 5, 11, 23, ... ketma-ketlikdagi keyingi son?', level: 'medium', points: 10, seconds: 120 },
-  { text: "Mantiq: Barcha A lar B. Ba'zi B lar C. Demak nima xulosa qilish mumkin?", level: 'hard', points: 15, seconds: 180 },
-  { text: "Agar 40% = 80 bo'lsa, 100% nechchi?", level: 'hard', points: 15, seconds: 180 },
-  { text: "Qisqa nutq: 'Kitob o'qishning foydasi' haqida 3 ta fikr ayting.", level: 'hard', points: 15, seconds: 180 },
+  { text: "9 + 7 = ?", answer: '16', level: 'easy', points: 5, seconds: 120 },
+  { text: "24 / 6 + 3 = ?", answer: '7', level: 'easy', points: 5, seconds: 120 },
+  { text: "O'zbekiston poytaxti qaysi shahar?", answer: 'Toshkent', level: 'easy', points: 5, seconds: 120 },
+  { text: "15 * 4 - 18 = ?", answer: '42', level: 'medium', points: 10, seconds: 120 },
+  { text: "3 ta sinonim so'z ayting.", answer: "Ma'nodosh 3 ta to'g'ri so'z", level: 'medium', points: 10, seconds: 120 },
+  { text: '2, 5, 11, 23, ... ketma-ketlikdagi keyingi son?', answer: '47', level: 'medium', points: 10, seconds: 120 },
+  { text: "Mantiq: Barcha A lar B. Ba'zi B lar C. Demak nima xulosa qilish mumkin?", answer: "Ba'zi C lar A bo'lishi shart emas", level: 'hard', points: 15, seconds: 180 },
+  { text: "Agar 40% = 80 bo'lsa, 100% nechchi?", answer: '200', level: 'hard', points: 15, seconds: 180 },
+  { text: "Qisqa nutq: 'Kitob o'qishning foydasi' haqida 3 ta fikr ayting.", answer: "Mazmunli 3 ta foyda aytilishi kerak", level: 'hard', points: 15, seconds: 180 },
 ]
 
 const studentWheelTones = ['#ff7b54', '#4dabf7', '#2ec4b6', '#ffd166', '#9b5de5', '#06d6a0', '#ef476f', '#f4a261']
@@ -76,6 +77,7 @@ function WheelOfFortunePage({ onBack }: WheelOfFortunePageProps) {
   const [timeLeft, setTimeLeft] = useState(0)
   const [timerRunning, setTimerRunning] = useState(false)
   const [studentError, setStudentError] = useState('')
+  const [judgement, setJudgement] = useState<{ correct: boolean; answer: string } | null>(null)
   const studentTimeoutRef = useRef<number | null>(null)
   const teacherItems = useTeacherItems<unknown>('wheel-of-fortune')
 
@@ -88,13 +90,23 @@ function WheelOfFortunePage({ onBack }: WheelOfFortunePageProps) {
       if (!item || typeof item !== 'object') {
         return false
       }
-      const q = item as Partial<Question>
+      const q = item as Partial<Question> & { question?: string; text?: string; answer?: string }
       return (
-        typeof q.text === 'string' &&
+        (typeof q.text === 'string' || typeof q.question === 'string') &&
+        typeof q.answer === 'string' &&
         (q.level === 'easy' || q.level === 'medium' || q.level === 'hard') &&
         typeof q.points === 'number' &&
         typeof q.seconds === 'number'
       )
+    }).map((item) => {
+      const q = item as Partial<Question> & { question?: string; text?: string; answer?: string }
+      return {
+        text: q.text || q.question || '',
+        answer: q.answer || '',
+        level: q.level as QuestionLevel,
+        points: q.points as number,
+        seconds: q.seconds as number,
+      }
     })
     return [...questionBank, ...teacher]
   }, [teacherItems])
@@ -158,6 +170,7 @@ function WheelOfFortunePage({ onBack }: WheelOfFortunePageProps) {
     setStudentRotation(nextRotation)
     setSelectedStudent(null)
     setActiveQuestion(null)
+    setJudgement(null)
     setTimerRunning(false)
     setTimeLeft(0)
 
@@ -171,6 +184,7 @@ function WheelOfFortunePage({ onBack }: WheelOfFortunePageProps) {
       setStudentSpinning(false)
       setSelectedStudent(student)
       setActiveQuestion(question)
+      setJudgement(null)
       setTimeLeft(question.seconds)
       setTimerRunning(true)
       studentTimeoutRef.current = null
@@ -188,6 +202,8 @@ function WheelOfFortunePage({ onBack }: WheelOfFortunePageProps) {
       }))
     }
     setTimerRunning(false)
+    setTimeLeft(0)
+    setJudgement({ correct, answer: activeQuestion.answer })
   }
 
   if (screen === 'setup') {
@@ -268,16 +284,17 @@ function WheelOfFortunePage({ onBack }: WheelOfFortunePageProps) {
                   <p className="wof-qmeta">
                     Daraja: <b>{activeQuestion.level}</b> • Ball: <b>+{activeQuestion.points}</b> • Vaqt: <b>{formatClock(timeLeft)}</b>
                   </p>
-                  <div className="wof-judge">
-                    <button type="button" onClick={() => setTimerRunning((prev) => !prev)}>
-                      {timerRunning ? 'Pauza' : 'Davom'}
-                    </button>
-                    <button type="button" onClick={() => setTimeLeft(activeQuestion.seconds)}>Qayta vaqt</button>
-                  </div>
-                  <div className="wof-judge">
-                    <button type="button" onClick={() => markStudentAnswer(true)}>To&apos;g&apos;ri (+{activeQuestion.points})</button>
-                    <button type="button" onClick={() => markStudentAnswer(false)}>Noto&apos;g&apos;ri (0)</button>
-                  </div>
+                  {judgement ? (
+                    <div className={judgement.correct ? 'wof-answer-box correct' : 'wof-answer-box wrong'}>
+                      <p>{judgement.correct ? "To'g'ri belgilandi." : "Noto'g'ri belgilandi."}</p>
+                      <strong>Javob: {judgement.answer}</strong>
+                    </div>
+                  ) : (
+                    <div className="wof-judge">
+                      <button type="button" onClick={() => markStudentAnswer(true)}>To&apos;g&apos;ri (+{activeQuestion.points})</button>
+                      <button type="button" onClick={() => markStudentAnswer(false)}>Noto&apos;g&apos;ri (0)</button>
+                    </div>
+                  )}
                 </>
               ) : (
                 <p className="wof-muted">Wheel ni aylantiring, tanlangan o&apos;quvchiga savol chiqadi.</p>

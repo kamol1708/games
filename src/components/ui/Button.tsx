@@ -15,7 +15,7 @@ type ButtonProps = SharedProps &
   )
 
 const base =
-  'inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#05060a] disabled:pointer-events-none disabled:opacity-60'
+  'inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#05060a] disabled:pointer-events-none disabled:opacity-60'
 
 const sizes = {
   sm: 'h-9 px-3 text-sm',
@@ -25,7 +25,7 @@ const sizes = {
 
 const variants = {
   primary:
-    'shine-button bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500 text-white shadow-[0_10px_40px_rgba(79,70,229,.35)] hover:scale-[1.02] hover:shadow-[0_16px_48px_rgba(79,70,229,.45)]',
+    'shine-button bg-gradient-to-r from-[#f4b16d] via-[#f59e0b] to-[#38bdf8] text-slate-950 shadow-[0_10px_40px_rgba(56,189,248,.25)] hover:scale-[1.02] hover:shadow-[0_16px_48px_rgba(245,158,11,.28)]',
   secondary:
     'glass-card text-white/90 hover:bg-white/10 hover:scale-[1.01]',
   ghost: 'text-white/80 hover:text-white hover:bg-white/5',
