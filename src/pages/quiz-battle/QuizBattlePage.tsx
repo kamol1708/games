@@ -22,7 +22,6 @@ type QuestionCard = {
 
 type Phase = 'preview' | 'pick' | 'answer' | 'reveal' | 'done'
 
-const PREVIEW_SECONDS = 10
 const ANSWER_SECONDS = 20
 const CARD_COUNT = 16
 
@@ -129,7 +128,7 @@ function QuizBattlePage({ onBack }: QuizBattlePageProps) {
   const [activeTeam, setActiveTeam] = useState<0 | 1>(0)
   const [cards, setCards] = useState<QuestionCard[]>([])
   const [phase, setPhase] = useState<Phase>('preview')
-  const [previewLeft, setPreviewLeft] = useState(PREVIEW_SECONDS)
+  const [previewLeft, setPreviewLeft] = useState(0)
   const [answerLeft, setAnswerLeft] = useState(ANSWER_SECONDS)
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null)
   const [locked, setLocked] = useState(false)
@@ -155,31 +154,18 @@ function QuizBattlePage({ onBack }: QuizBattlePageProps) {
     setCards(buildCardsFrom(mergedBank))
     setScores([0, 0])
     setActiveTeam(0)
-    setPhase('preview')
-    setPreviewLeft(PREVIEW_SECONDS)
+    setPhase('pick')
+    setPreviewLeft(0)
     setAnswerLeft(ANSWER_SECONDS)
     setSelectedCardId(null)
     setLocked(false)
-    setMessage("Kartalarni eslab qoling. 10 soniyadan keyin yopiladi.")
+    setMessage("Kartalar default holatda yopiq. Jamoalar navbat bilan tanlaydi.")
     setComboA(0)
     setComboB(0)
     setBestComboA(0)
     setBestComboB(0)
     setScreen('play')
   }
-
-  useEffect(() => {
-    if (screen !== 'play' || phase !== 'preview') {
-      return
-    }
-    if (previewLeft <= 0) {
-      setPhase('pick')
-      setMessage('Kartalar yopildi. Jamoalar navbat bilan tanlaydi.')
-      return
-    }
-    const id = window.setTimeout(() => setPreviewLeft((prev) => prev - 1), 1000)
-    return () => window.clearTimeout(id)
-  }, [screen, phase, previewLeft])
 
   useEffect(() => {
     if (screen !== 'play' || phase !== 'answer' || !selectedCard) {
@@ -283,7 +269,7 @@ function QuizBattlePage({ onBack }: QuizBattlePageProps) {
   const winnerName = phase === 'done' && scores[0] !== scores[1] ? (scores[0] > scores[1] ? teamA : teamB) : null
   const showWinnerModal = phase === 'done'
 
-  const visibleCard = (card: QuestionCard) => phase === 'preview' || card.used || selectedCardId === card.id
+  const visibleCard = (card: QuestionCard) => card.used || selectedCardId === card.id
 
   if (screen === 'intro') {
     return (
@@ -296,7 +282,7 @@ function QuizBattlePage({ onBack }: QuizBattlePageProps) {
           </header>
 
           <p className="qb-lead">
-            16 ta savol kartasi 10 soniya preview bo&apos;ladi. Keyin kartalar yopiladi va jamoalar navbat bilan tanlab javob beradi.
+            16 ta savol kartasi default holatda yopiq bo&apos;ladi. Jamoalar navbat bilan kartani tanlab javob beradi.
           </p>
 
           <div className="qb-team-inputs">
@@ -391,7 +377,7 @@ function QuizBattlePage({ onBack }: QuizBattlePageProps) {
                 <h2>{phase === 'done' ? 'O‘yin tugadi' : 'Savol paneli'}</h2>
                 <p>
                   {phase === 'preview'
-                    ? 'Kartalar joylashuvini yodlab oling.'
+                    ? 'Kartalar yopiq holatda kutib turibdi.'
                     : phase === 'pick'
                       ? `${activeTeam === 0 ? teamA : teamB} uchun bitta kartani tanlang.`
                       : `Qolgan kartalar: ${remaining}`}

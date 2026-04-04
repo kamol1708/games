@@ -753,8 +753,8 @@ export default function ImageQuizPage() {
   }
 
   return (
-    <main className="min-h-screen w-screen overflow-y-auto bg-slate-950 text-white">
-      <div className="min-h-screen w-full border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur md:p-6">
+    <main className="min-h-screen w-screen overflow-hidden bg-slate-950 text-white">
+      <div className="min-h-screen w-full border border-white/10 bg-white/5 p-3 shadow-2xl backdrop-blur md:p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold uppercase tracking-[0.14em] text-cyan-300">Rasmli Quiz</p>
           <p className="text-sm font-semibold text-slate-300">Ball: <span className="text-amber-300">{score}</span></p>
@@ -771,21 +771,21 @@ export default function ImageQuizPage() {
           <p>Qiyinlik: <span className="font-bold text-amber-200">{currentQuestion!.difficulty}</span></p>
         </div>
 
-        <section className="mt-5 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70">
+        <section className="mt-4 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
+          <div className="flex min-h-[calc(100vh-11.75rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70">
             {missingImageMap[currentQuestion!.id] ? (
-              <div className="grid h-[360px] place-items-center text-lg font-bold text-rose-300 md:h-[430px]">Rasm topilmadi</div>
+              <div className="grid min-h-0 flex-1 place-items-center text-lg font-bold text-rose-300">Rasm topilmadi</div>
             ) : (
               <img
                 src={currentQuestion!.image}
                 alt={currentQuestion!.question}
-                className="h-[360px] w-full bg-slate-950 object-contain p-2 md:h-[430px] md:p-3"
+                className="min-h-0 flex-1 bg-slate-950 object-contain p-2 md:p-3"
                 style={{ objectPosition: imageObjectPositionById[currentQuestion!.id] ?? 'center' }}
                 onError={() => setMissingImageMap((prev) => ({ ...prev, [currentQuestion!.id]: true }))}
               />
             )}
 
-            <div className="border-t border-white/10 bg-slate-950/80 p-4">
+            <div className="border-t border-white/10 bg-slate-950/80 p-3 md:p-4">
               <button
                 type="button"
                 onClick={() => setIsAboutOpen((prev) => !prev)}
@@ -803,7 +803,7 @@ export default function ImageQuizPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-cyan-300/20 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.2),transparent_40%),linear-gradient(160deg,rgba(15,23,42,0.95),rgba(2,6,23,0.95))] p-4 shadow-[0_20px_50px_rgba(8,47,73,0.45)] md:p-5">
+          <div className="flex min-h-[calc(100vh-11.75rem)] flex-col rounded-3xl border border-cyan-300/20 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.2),transparent_40%),linear-gradient(160deg,rgba(15,23,42,0.95),rgba(2,6,23,0.95))] p-4 shadow-[0_20px_50px_rgba(8,47,73,0.45)] md:p-5">
             <div className="flex items-center justify-between gap-3">
               <p className="inline-flex rounded-full border border-cyan-300/35 bg-cyan-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-cyan-100">
                 Savol paneli
@@ -815,7 +815,7 @@ export default function ImageQuizPage() {
 
             <h2 className="mt-4 text-2xl font-black leading-tight text-white md:text-3xl">{currentQuestion!.question}</h2>
 
-            <div className="mt-5 grid gap-3">
+            <div className="mt-5 grid flex-1 content-start gap-3">
               {currentQuestion!.options.map((option, index) => (
                 <button
                   key={`${currentQuestion!.id}-${option}`}

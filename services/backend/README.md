@@ -32,6 +32,8 @@ cd services/backend
 
 Alembic birinchi migrationda kerakli jadvallarni yaratadi. Agar `data/*.json` ichida eski ma'lumotlar bo‘lsa, backend startup paytida bo‘sh PostgreSQL bazaga ularni import qiladi.
 
+Deployda ham migration ishga tushishi shart. Aks holda `users` yoki `sessions` jadvali yo‘qligi sabab `POST /auth/login` `500` qaytaradi va frontendda bu ba'zan CORS xatosidek ko‘rinadi.
+
 ## Ishga tushirish
 
 ```bash

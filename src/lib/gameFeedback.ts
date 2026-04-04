@@ -222,8 +222,11 @@ export async function submitGameFeedback({ gameKey, gameTitle, message }: Submit
     userId: session.userId,
     userName: session.fullName || session.email,
     message: cleanMessage,
-    status: 'pending',
+    status: 'approved',
     createdAt: Date.now(),
+    approvedBy: session.userId,
+    approvedByName: session.fullName || session.email,
+    approvedAt: Date.now(),
   }
 
   upsertThreads([optimistic])
@@ -253,7 +256,7 @@ export async function submitGameFeedback({ gameKey, gameTitle, message }: Submit
       return saved
     }
   } catch {
-    // keep optimistic local item
+    // keep optimistic local item if backend is temporarily unavailable
   }
 
   return optimistic

@@ -501,7 +501,7 @@ function EndOverlay({
   )
 }
 
-export default function FrogPondPage() {
+export default function FrogPondPage({ onBack }: { onBack?: () => void }) {
   const navigate = useNavigate()
   const teacherQuestions = useTeacherItems<FrogPondTeacherQuestion>('frog-pond')
   const pageRef = useRef<HTMLElement | null>(null)
@@ -1369,6 +1369,13 @@ export default function FrogPondPage() {
           <div className="frog-pond-board-scroll">
             <div className="frog-pond-board">
               <div className="frog-pond-board-hud">
+                <button
+                  type="button"
+                  className="frog-pond-back-button"
+                  onClick={() => (onBack ? onBack() : navigate('/games'))}
+                >
+                  ← Orqaga
+                </button>
                 <div className="frog-pond-board-pill">
                   <span>Bosqich</span>
                   <strong>{stageIndex + 1} / {STAGE_COUNT}</strong>

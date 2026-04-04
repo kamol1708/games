@@ -2,20 +2,22 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
 import os
 import secrets
 from typing import Literal
+from urllib import parse, request
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Response, status
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .db import get_db
+from .db import engine, get_db
 from .legacy_import import import_legacy_json_if_needed
-from .models import GameFeedback, GameQuestions, SessionToken, Subscription, User
+from .models import Base, GameFeedback, GameQuestions, SessionToken, Subscription, User
 
 
 DEFAULT_CLIENT_ORIGINS = [
@@ -24,9 +26,28 @@ DEFAULT_CLIENT_ORIGINS = [
     "http://127.0.0.1:5174",
     "http://localhost:5174",
 ]
-SEED_ADMIN_EMAIL = os.getenv("SEED_ADMIN_EMAIL", "admin@gamehub.local")
-SEED_ADMIN_PASSWORD = os.getenv("SEED_ADMIN_PASSWORD", "admin1234")
+SEED_ADMIN_EMAIL = os.getenv("SEED_ADMIN_EMAIL", "").strip().lower()
+SEED_ADMIN_PASSWORD = os.getenv("SEED_ADMIN_PASSWORD", "").strip()
+SEED_TEACHER_EMAIL = os.getenv("SEED_TEACHER_EMAIL", "").strip().lower()
+SEED_TEACHER_PASSWORD = os.getenv("SEED_TEACHER_PASSWORD", "").strip()
+SEED_TEACHER_NAME = os.getenv("SEED_TEACHER_NAME", "Teacher").strip() or "Teacher"
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 PREMIUM_DURATION_MS = 30 * 24 * 60 * 60 * 1000
+BLOCKED_FEEDBACK_TERMS = {
+    "fuck",
+    "shit",
+    "bitch",
+    "idiot",
+    "stupid",
+    "ahmoq",
+    "tentak",
+    "jinni",
+    "la'nati",
+    "lanati",
+    "so'kin",
+    "sokin",
+}
 
 
 class UserCreate(BaseModel):
@@ -92,7 +113,6 @@ class BillingCheckoutInput(BaseModel):
     method: Literal["card", "click", "payme"] = "card"
     fullName: str = Field(min_length=1)
     email: str
-    seats: int = Field(default=1, ge=1, le=500)
     promoCode: str | None = None
 
 
@@ -200,30 +220,121 @@ def build_subscription_payload(item: Subscription | None) -> BillingStatusRespon
     return BillingStatusResponse(active=active, plan=item.plan or "starter", expires_at=item.expires_at)
 
 
-def seed_admin(db: Session) -> None:
-    existing = db.scalar(select(User).where(User.email == SEED_ADMIN_EMAIL))
-    if existing:
+def contains_blocked_feedback_terms(message: str) -> bool:
+    lowered = message.lower()
+    normalized = "".join(char if char.isalnum() or char.isspace() else " " for char in lowered)
+    words = {word for word in normalized.split() if word}
+    return any(term in lowered or term in words for term in BLOCKED_FEEDBACK_TERMS)
+
+
+def send_feedback_to_telegram(item: GameFeedback) -> None:
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         return
 
-    db.add(
-        User(
-            id=str(uuid4()),
-            email=SEED_ADMIN_EMAIL,
-            username="Admin",
-            password_hash=hash_password(SEED_ADMIN_PASSWORD),
-            roles=["admin", "teacher"],
-            created_at=now_ms(),
-        )
+    text = (
+        "Yangi izoh keldi!\n\n"
+        f"O'yin: {item.game_title}\n"
+        f"User: {item.user_name}\n"
+        f"Xabar: {item.message}\n"
+        f"Vaqt: {item.created_at}"
     )
+    body = parse.urlencode(
+        {
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": text,
+        }
+    ).encode("utf-8")
+
+    req = request.Request(
+        url=f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+        data=body,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    try:
+        with request.urlopen(req, timeout=10) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+            if not payload.get("ok"):
+                print("Telegram notification failed:", payload)
+    except Exception as exc:
+        print("Telegram notification failed:", exc)
+
+
+def seed_admin(db: Session) -> None:
+    if not SEED_ADMIN_EMAIL or not SEED_ADMIN_PASSWORD:
+        return
+
+    users = list(db.scalars(select(User)))
+    target = next((user for user in users if user.email == SEED_ADMIN_EMAIL), None)
+
+    for user in users:
+        roles = list(user.roles or [])
+        if user.email == SEED_ADMIN_EMAIL:
+            user.roles = ["admin", "teacher"]
+            user.password_hash = hash_password(SEED_ADMIN_PASSWORD)
+            continue
+
+        if "admin" in roles:
+            user.roles = [role for role in roles if role != "admin"] or ["teacher"]
+
+    if not target:
+        db.add(
+            User(
+                id=str(uuid4()),
+                email=SEED_ADMIN_EMAIL,
+                username="Admin",
+                password_hash=hash_password(SEED_ADMIN_PASSWORD),
+                roles=["admin", "teacher"],
+                created_at=now_ms(),
+            )
+        )
+
+    db.commit()
+
+
+def seed_teacher(db: Session) -> None:
+    if not SEED_TEACHER_EMAIL or not SEED_TEACHER_PASSWORD:
+        return
+
+    users = list(db.scalars(select(User)))
+    target = next((user for user in users if user.email == SEED_TEACHER_EMAIL), None)
+
+    for user in users:
+        roles = list(user.roles or [])
+
+        if user.email == SEED_TEACHER_EMAIL:
+            user.roles = ["teacher"]
+            user.username = SEED_TEACHER_NAME
+            user.password_hash = hash_password(SEED_TEACHER_PASSWORD)
+            continue
+
+        if "teacher" in roles and "admin" not in roles:
+            remaining_roles = [role for role in roles if role != "teacher"]
+            user.roles = remaining_roles or ["student"]
+
+    if not target:
+        db.add(
+            User(
+                id=str(uuid4()),
+                email=SEED_TEACHER_EMAIL,
+                username=SEED_TEACHER_NAME,
+                password_hash=hash_password(SEED_TEACHER_PASSWORD),
+                roles=["teacher"],
+                created_at=now_ms(),
+            )
+        )
+
     db.commit()
 
 
 @app.on_event("startup")
 def on_startup() -> None:
+    Base.metadata.create_all(bind=engine)
     db = next(get_db())
     try:
         import_legacy_json_if_needed(db)
         seed_admin(db)
+        seed_teacher(db)
     finally:
         db.close()
 
@@ -284,21 +395,10 @@ def health() -> dict[str, str]:
 @app.post("/users/", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 @app.post("/users", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def register_user(payload: UserCreate, db: Session = Depends(get_db)) -> UserOut:
-    email = normalize_email(payload.email)
-    if db.scalar(select(User).where(User.email == email)):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Bu email bilan foydalanuvchi mavjud.")
-
-    user = User(
-        id=str(uuid4()),
-        email=email,
-        username=payload.username.strip(),
-        password_hash=hash_password(payload.password),
-        roles=["teacher"],
-        created_at=now_ms(),
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Teacher ro'yxatdan o'tishi yopilgan. Faqat maxsus teacher login bilan kiriladi.",
     )
-    db.add(user)
-    db.commit()
-    return build_user_out(user)
 
 
 @app.post("/auth/login", response_model=LoginResponse)
@@ -355,6 +455,9 @@ def put_game_questions(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> QuestionsResponse:
+    if not is_teacher_like(user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Faqat teacher yoki admin savol saqlay oladi.")
+
     item = db.get(GameQuestions, game_key)
     if not item:
         item = GameQuestions(game_key=game_key, questions=[], updated_at=0, updated_by=None)
@@ -371,33 +474,36 @@ def put_game_questions(
 def get_game_feedback(user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> FeedbackListResponse:
     query = select(GameFeedback).order_by(GameFeedback.created_at.desc())
     items = list(db.scalars(query))
-    visible = items if is_teacher_like(user) else [
-        item for item in items if item.status == "approved" or item.user_id == user.id
-    ]
-    return FeedbackListResponse(items=[build_feedback_item(item) for item in visible])
+    return FeedbackListResponse(items=[build_feedback_item(item) for item in items])
 
 
 @app.post("/game-feedback", response_model=FeedbackItem, status_code=status.HTTP_201_CREATED)
 def create_game_feedback(
     payload: FeedbackCreateInput,
+    background_tasks: BackgroundTasks,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> FeedbackItem:
+    clean_message = payload.message.strip()
+    if contains_blocked_feedback_terms(clean_message):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Izoh ichida nomaqbul so'z bor.")
+
     item = GameFeedback(
         id=str(uuid4()),
         game_key=payload.game_key.strip(),
         game_title=(payload.game_title or payload.game_key).strip(),
         user_id=user.id,
         user_name=user.username or user.email,
-        message=payload.message.strip(),
-        status="pending",
+        message=clean_message,
+        status="approved",
         created_at=now_ms(),
-        approved_by=None,
-        approved_by_name=None,
-        approved_at=None,
+        approved_by=user.id,
+        approved_by_name=user.username or user.email,
+        approved_at=now_ms(),
     )
     db.add(item)
     db.commit()
+    background_tasks.add_task(send_feedback_to_telegram, item)
     return build_feedback_item(item)
 
 
@@ -460,7 +566,7 @@ def billing_checkout(
         item.full_name = payload.fullName.strip()
         item.plan = payload.plan
         item.billing_cycle = payload.billingCycle
-        item.seats = payload.seats
+        item.seats = 1
         item.method = payload.method
         item.active = active
         item.expires_at = expires_at

@@ -156,7 +156,7 @@ async function buildSession(email: string, payload: LoginPayload): Promise<AuthS
 }
 
 export function getRegisteredTeachers() {
-  return readUsersCache().filter((u) => u.role === 'teacher' || u.role === 'admin')
+  return readUsersCache().filter((u) => u.role === 'teacher')
 }
 
 export function getRegisteredStudents() {
@@ -193,47 +193,11 @@ export async function logout() {
 }
 
 export async function registerTeacher(input: { fullName: string; email: string; password: string }): Promise<AuthResult> {
-  const fullName = input.fullName.trim()
-  const email = input.email.trim().toLowerCase()
-  const password = input.password
-
-  if (!fullName) return { ok: false, message: 'Ism kiriting.' }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, message: "Email noto'g'ri." }
-  if (password.length < 4) return { ok: false, message: "Parol kamida 4 ta belgi bo'lsin." }
-
-  try {
-    await apiRequest('/users', {
-      method: 'POST',
-      body: JSON.stringify({
-        email,
-        username: normalizeUsername(fullName, email),
-        password,
-      }),
-    })
-  } catch (error) {
-    if (!isNetworkError(error)) {
-      return { ok: false, message: error instanceof Error ? error.message : "Ro'yxatdan o'tishda xatolik." }
-    }
-
-    if (findCachedUserByEmail(email)) {
-      return { ok: false, message: 'Bu email bilan foydalanuvchi mavjud.' }
-    }
-
-    const localUser: LocalUser = {
-      id: `local-${Date.now()}`,
-      fullName,
-      email,
-      password,
-      role: 'teacher',
-      createdAt: Date.now(),
-    }
-
-    saveUserToCache(localUser)
-    const session = buildLocalSession(localUser)
-    return { ok: true, session }
+  void input
+  return {
+    ok: false,
+    message: "Teacher ro'yxatdan o'tishi yopilgan. Faqat sizdagi maxsus teacher login bilan kiriladi.",
   }
-
-  return loginTeacher({ email, password })
 }
 
 export async function loginTeacher(input: { email: string; password: string }): Promise<AuthResult> {

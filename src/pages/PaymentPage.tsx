@@ -18,7 +18,6 @@ type PlanConfig = {
   description: string
   monthly: number
   yearly: number
-  seatsLabel: string
   features: string[]
 }
 
@@ -29,7 +28,6 @@ const plans: Record<PlanKey, PlanConfig> = {
     description: 'Great for trying the workspace with a small team.',
     monthly: 0,
     yearly: 0,
-    seatsLabel: 'Up to 5 members',
     features: ['Core boards', 'Docs', 'Community support'],
   },
   pro: {
@@ -38,7 +36,6 @@ const plans: Record<PlanKey, PlanConfig> = {
     description: 'Best for growing teams that ship fast and need automation.',
     monthly: 19,
     yearly: 15,
-    seatsLabel: 'Per seat',
     features: ['Unlimited projects', 'Automations', 'Advanced dashboards', 'Priority support'],
   },
   team: {
@@ -47,7 +44,6 @@ const plans: Record<PlanKey, PlanConfig> = {
     description: 'For organizations that need admin controls and enterprise readiness.',
     monthly: 49,
     yearly: 39,
-    seatsLabel: 'Per seat',
     features: ['SSO + SCIM', 'Audit logs', 'Permissions', 'Dedicated onboarding'],
   },
 }
@@ -96,7 +92,6 @@ export default function PaymentPage() {
   const [cardNumber, setCardNumber] = useState('')
   const [expiry, setExpiry] = useState('')
   const [cvc, setCvc] = useState('')
-  const [seats, setSeats] = useState(5)
   const [promoInput, setPromoInput] = useState('')
   const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -105,7 +100,7 @@ export default function PaymentPage() {
 
   const plan = plans[requestedPlan] ?? plans.pro
   const unitPrice = billingCycle === 'monthly' ? plan.monthly : plan.yearly
-  const effectiveSeats = plan.key === 'starter' ? 1 : Math.max(1, Math.min(500, seats))
+  const effectiveSeats = 1
   const subtotal = unitPrice * effectiveSeats
   const appliedPromo = appliedPromoCode ? promoCodes[appliedPromoCode] : null
   const discount =
@@ -143,7 +138,6 @@ export default function PaymentPage() {
         method,
         fullName,
         email,
-        seats: effectiveSeats,
         promoCode: appliedPromoCode,
       })
       setSuccessRef(result.transaction_id)
@@ -336,7 +330,7 @@ export default function PaymentPage() {
                       ) : null}
 
                       <div className="grid gap-4 sm:grid-cols-3">
-                        <label className="block text-sm sm:col-span-2">
+                        <label className="block text-sm sm:col-span-3">
                           <span className="mb-1.5 block text-white/75">Card number</span>
                           <input
                             className="h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-white outline-none transition placeholder:text-white/35 focus:border-violet-400/60"
@@ -344,17 +338,6 @@ export default function PaymentPage() {
                             onChange={(e) => setCardNumber(formatCard(e.target.value))}
                             placeholder="4242 4242 4242 4242"
                             disabled={method !== 'card'}
-                          />
-                        </label>
-                        <label className="block text-sm">
-                          <span className="mb-1.5 block text-white/75">Seats</span>
-                          <input
-                            type="number"
-                            min={1}
-                            max={500}
-                            className="h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-white outline-none transition placeholder:text-white/35 focus:border-violet-400/60"
-                            value={effectiveSeats}
-                            onChange={(e) => setSeats(Number(e.target.value || 1))}
                           />
                         </label>
                       </div>
@@ -423,7 +406,7 @@ export default function PaymentPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-medium text-white">{plan.name}</p>
-                    <p className="mt-1 text-xs text-white/50">{plan.seatsLabel}</p>
+                    <p className="mt-1 text-xs text-white/50">Single workspace access</p>
                   </div>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/70">
                     {billingCycle === 'monthly' ? 'Monthly' : 'Yearly'}
@@ -442,10 +425,6 @@ export default function PaymentPage() {
                 <div className="flex items-center justify-between text-white/65">
                   <span>Unit price</span>
                   <span>${unitPrice.toFixed(2)}</span>
-                </div>
-                <div className="flex items-center justify-between text-white/65">
-                  <span>Seats</span>
-                  <span>{plan.key === 'starter' ? 1 : effectiveSeats}</span>
                 </div>
                 {discount > 0 ? (
                   <div className="flex items-center justify-between text-emerald-300">

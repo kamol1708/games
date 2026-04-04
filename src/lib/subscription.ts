@@ -25,7 +25,6 @@ export type CheckoutInput = {
   method: 'card' | 'click' | 'payme'
   fullName: string
   email: string
-  seats: number
   promoCode?: string | null
 }
 
@@ -122,7 +121,6 @@ export async function checkoutPremium(input: CheckoutInput) {
         method: input.method,
         fullName: input.fullName,
         email: input.email,
-        seats: input.seats,
         promoCode: input.promoCode ?? null,
       }),
     },

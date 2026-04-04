@@ -7,6 +7,7 @@ import {
   Routes,
   useLocation,
   useNavigate,
+  useSearchParams,
 } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import DocsPage from './pages/DocsPage'
@@ -59,6 +60,7 @@ import {
   getAuthSession,
   getRegisteredStudents,
   getRegisteredTeachers,
+  isUserAuthenticated,
   isTeacherAuthenticated,
   loginStudent,
   loginTeacher,
@@ -681,6 +683,44 @@ function isPremiumLockedPath(path: string) {
   return PREMIUM_LOCKED_GAMES.has(path)
 }
 
+type GameCollection = 'all' | 'free' | 'premium' | 'team' | 'classroom' | 'brain'
+
+const TEAM_GAME_PATHS = new Set([
+  '/games/quiz-battle',
+  '/games/tug-of-war',
+  '/games/bilim-poyezdi',
+  '/games/classroom-team-quiz',
+  '/games/monopoly-calibration',
+  '/games/bumbuzzle',
+  '/games/frog-pond',
+])
+
+const CLASSROOM_GAME_PATHS = new Set([
+  '/games/wheel-of-fortune',
+  '/games/image-quiz',
+  '/games/learning',
+  '/games/classroom-team-quiz',
+  '/games/quiz-battle',
+  '/games/kim-millioner',
+])
+
+const BRAIN_GAME_PATHS = new Set([
+  '/games/memory-rush',
+  '/games/word-search',
+  '/games/treasure-hunt',
+  '/games/football-challenge',
+  '/games/flag-race',
+  '/games/flag-player-race',
+])
+
+function getCollectionsForGame(path: string): GameCollection[] {
+  const collections: GameCollection[] = [isPremiumLockedPath(path) ? 'premium' : 'free']
+  if (TEAM_GAME_PATHS.has(path)) collections.push('team')
+  if (CLASSROOM_GAME_PATHS.has(path)) collections.push('classroom')
+  if (BRAIN_GAME_PATHS.has(path)) collections.push('brain')
+  return collections
+}
+
 function AppUiStyleTag() {
   return <style>{appUiStyles}</style>
 }
@@ -703,13 +743,19 @@ function SiteLoader() {
 function ProtectedRoute({
   children,
   role,
-}: PropsWithChildren<{ role?: 'admin' | 'user' }>) {
+}: PropsWithChildren<{ role?: 'admin' | 'teacher' | 'user' }>) {
   const location = useLocation()
-  const isAuthenticated = role ? isTeacherAuthenticated() : true
-  const isAdmin = isTeacherAuthenticated()
+  const session = getAuthSession()
+  const isAuthenticated = role === 'user' || role == null ? isUserAuthenticated() : isTeacherAuthenticated()
+  const isAdmin = session?.role === 'admin'
+  const isTeacher = session?.role === 'teacher' || session?.role === 'admin'
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  if (role === 'teacher' && !isTeacher) {
+    return <Navigate to="/home" replace />
   }
 
   if (role === 'admin' && !isAdmin) {
@@ -744,10 +790,16 @@ function MainLayout() {
           <Link className="app-nav-link" to="/games">Games</Link>
           {session ? (
             <>
-              {session.role === 'teacher' || session.role === 'admin' ? (
-                <Link className="app-nav-link cta" to="/admin">Teacher Panel</Link>
+              {session.role === 'admin' ? (
+                <Link className="app-nav-link cta" to="/admin">Admin Panel</Link>
+              ) : null}
+              {session.role === 'teacher' ? (
+                <Link className="app-nav-link cta" to="/teacher">Teacher Panel</Link>
+              ) : null}
+              {session.role === 'admin' ? (
+                <Link className="app-nav-link" to="/teacher">Teacher Panel</Link>
               ) : (
-                <span className="app-nav-link cta" aria-label="Student session">Student</span>
+                session.role === 'student' ? <span className="app-nav-link cta" aria-label="Student session">Student</span> : null
               )}
               <button
                 type="button"
@@ -772,7 +824,12 @@ function MainLayout() {
   )
 }
 
-function AdminLayout() {
+function PanelLayout({
+  mode,
+}: {
+  mode: 'teacher' | 'admin'
+}) {
+  const isAdmin = mode === 'admin'
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#04050a] text-white">
       <div className="pointer-events-none absolute -left-10 top-0 h-64 w-64 rounded-full bg-violet-500/20 blur-[110px]" />
@@ -786,12 +843,16 @@ function AdminLayout() {
           <div className="relative border-b border-white/10 px-4 py-4 sm:px-6 sm:py-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">Teacher Control Center</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
+                  {isAdmin ? 'Admin Control Center' : 'Teacher Control Center'}
+                </p>
                 <h1 className="mt-2 bg-gradient-to-r from-white via-sky-100 to-violet-200 bg-clip-text text-2xl font-semibold tracking-tight text-transparent sm:text-4xl">
-                  Teacher Admin Panel
+                  {isAdmin ? 'Admin Panel' : 'Teacher Panel'}
                 </h1>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60 sm:text-base">
-                  O&apos;yinlar savollari, teacher kontenti va boshqaruv sozlamalarini bitta premium paneldan boshqaring.
+                  {isAdmin
+                    ? "Platforma foydalanuvchilari, analytics va teacher ishlarini alohida admin paneldan boshqaring."
+                    : "O'yinlar savollari, feedback va teacher kontentini alohida teacher paneldan boshqaring."}
                 </p>
               </div>
 
@@ -800,17 +861,21 @@ function AdminLayout() {
                   <p className="text-xs text-white/45">Panel holati</p>
                   <p className="mt-1 text-sm font-semibold text-white">Online • LocalStorage Sync</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => window.dispatchEvent(new CustomEvent('teacher-question-admin:open-add-modal'))}
-                  className="rounded-2xl border border-sky-300/20 bg-gradient-to-r from-sky-400/15 to-indigo-500/15 px-4 py-2.5 text-left transition hover:from-sky-400/20 hover:to-indigo-500/20"
-                >
-                  <div className="text-sm font-semibold text-sky-100">+ Savol qo‘shish</div>
-                  <div className="mt-0.5 text-[11px] text-sky-100/70">O‘yin tanlash modal ichida</div>
-                </button>
+                {!isAdmin ? (
+                  <button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent('teacher-question-admin:open-add-modal'))}
+                    className="rounded-2xl border border-sky-300/20 bg-gradient-to-r from-sky-400/15 to-indigo-500/15 px-4 py-2.5 text-left transition hover:from-sky-400/20 hover:to-indigo-500/20"
+                  >
+                    <div className="text-sm font-semibold text-sky-100">+ Savol qo‘shish</div>
+                    <div className="mt-0.5 text-[11px] text-sky-100/70">O‘yin tanlash modal ichida</div>
+                  </button>
+                ) : null}
                 <div className="flex flex-wrap gap-2">
                   <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">Savollar</span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">Teacher tools</span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
+                    {isAdmin ? 'Admin tools' : 'Teacher tools'}
+                  </span>
                   <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">Analytics</span>
                 </div>
               </div>
@@ -846,7 +911,7 @@ function LoginForm() {
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/admin'
+  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/teacher'
 
   const handleRoleChange = (role: 'teacher' | 'student') => {
     setSelectedRole(role)
@@ -860,11 +925,12 @@ function LoginForm() {
     const result = selectedRole === 'student'
       ? await loginStudent({ email, password })
       : await loginTeacher({ email, password })
-    if (!result.ok) {
+    if (!result.ok || !('session' in result)) {
       setError(result.message ?? "Kirishda xatolik.")
       setIsSubmitting(false)
       return
     }
+    const session = result.session!
     if (selectedRole === 'teacher') {
       try {
         await syncAllTeacherContentFromBackend()
@@ -873,7 +939,14 @@ function LoginForm() {
       }
     }
     setError('')
-    navigate(selectedRole === 'student' ? '/games' : from, { replace: true })
+    const teacherDestination = from === '/admin' ? '/teacher' : from
+    const destination =
+      selectedRole === 'student'
+        ? '/games'
+        : session.role === 'admin'
+          ? '/admin'
+          : teacherDestination
+    navigate(destination, { replace: true })
     setIsSubmitting(false)
   }
 
@@ -952,7 +1025,7 @@ function Register() {
       }
     }
     setError('')
-    navigate(selectedRole === 'student' ? '/games' : '/admin', { replace: true })
+    navigate('/home', { replace: true })
     setIsSubmitting(false)
   }
 
@@ -962,7 +1035,7 @@ function Register() {
       <h2 className="auth-title">{selectedRole === 'teacher' ? 'Register Teacher' : 'Register Student'}</h2>
       <p className="auth-note">
         {selectedRole === 'teacher'
-          ? "Ro'yxatdan o'tsangiz akkaunt teacher rolida ochiladi."
+          ? "Teacher akkaunt yopiq. Teacher panelga faqat maxsus email va parol bilan kiriladi."
           : "Ro'yxatdan o'tsangiz akkaunt o'quvchi rolida ochiladi."}
       </p>
       <div className="role-switch">
@@ -992,7 +1065,7 @@ function Register() {
       />
       {error ? <p className="auth-note" style={{ color: '#ff8f8f', marginTop: -4 }}>{error}</p> : null}
       <button className="pill-btn" type="button" onClick={() => void handleRegister()} disabled={isSubmitting}>
-        {isSubmitting ? 'Yaratilmoqda...' : selectedRole === 'teacher' ? "Teacher akkaunt yaratish" : "O'quvchi akkaunt yaratish"}
+        {isSubmitting ? 'Yaratilmoqda...' : selectedRole === 'teacher' ? 'Teacher registration yopiq' : "O'quvchi akkaunt yaratish"}
       </button>
       <p className="auth-note" style={{ marginTop: 2 }}>
         Akkaunt bormi? <Link className="sub-link" to={`/login?role=${selectedRole}`}>Kirish</Link>
@@ -1001,8 +1074,13 @@ function Register() {
   )
 }
 
-function HelloAdmin() {
-  const [activeTab, setActiveTab] = useState<'questions' | 'feedback' | 'games' | 'users' | 'analytics'>('questions')
+function ControlCenter({ mode }: { mode: 'teacher' | 'admin' }) {
+  const isAdmin = mode === 'admin'
+  type ControlTab = 'questions' | 'feedback' | 'games' | 'users' | 'analytics'
+
+  const [activeTab, setActiveTab] = useState<ControlTab>(
+    isAdmin ? 'feedback' : 'questions',
+  )
   const [refreshKey, setRefreshKey] = useState(0)
   const [gameSettings, setGameSettings] = useState<Record<string, { enabled: boolean; timerSec: number }>>(() => {
     if (typeof window === 'undefined') return {}
@@ -1016,13 +1094,17 @@ function HelloAdmin() {
     }
   })
 
-  const tabs = [
-    { key: 'questions', label: 'Questions' },
-    { key: 'feedback', label: 'Feedback' },
-    { key: 'games', label: 'Games' },
-    { key: 'users', label: 'Users' },
-    { key: 'analytics', label: 'Analytics' },
-  ] as const
+  const tabs: Array<{ key: ControlTab; label: string }> = isAdmin
+    ? [
+        { key: 'feedback', label: 'Feedback' },
+        { key: 'users', label: 'Users' },
+        { key: 'analytics', label: 'Analytics' },
+      ]
+    : [
+        { key: 'questions', label: 'Questions' },
+        { key: 'feedback', label: 'Feedback' },
+        { key: 'games', label: 'Games' },
+      ]
 
   const teacherList = useMemo(() => getRegisteredTeachers(), [refreshKey])
   const studentList = useMemo(() => getRegisteredStudents(), [refreshKey])
@@ -1079,8 +1161,10 @@ function HelloAdmin() {
       <aside className="h-fit rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[0_18px_40px_rgba(0,0,0,.2)] backdrop-blur-xl">
         <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-sky-400/15 to-violet-500/10 p-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/45">Session</p>
-          <p className="mt-2 text-lg font-semibold text-white">Teacher Mode</p>
-          <p className="mt-1 text-xs leading-5 text-white/60">Savollar, o‘yinlar va foydalanuvchilarni boshqarish paneli.</p>
+          <p className="mt-2 text-lg font-semibold text-white">{isAdmin ? 'Admin Mode' : 'Teacher Mode'}</p>
+          <p className="mt-1 text-xs leading-5 text-white/60">
+            {isAdmin ? 'Admin uchun foydalanuvchilar va analytics boshqaruvi.' : 'Teacher uchun savollar va o‘yin boshqaruvi.'}
+          </p>
         </div>
 
         <div className="mt-4 grid gap-2">
@@ -1104,12 +1188,12 @@ function HelloAdmin() {
 
         <div className="mt-4 space-y-2">
           <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
-            <p className="text-xs text-white/45">Teacherlar</p>
-            <p className="mt-1 text-2xl font-semibold text-white">{teacherList.length}</p>
+            <p className="text-xs text-white/45">{isAdmin ? 'Teacherlar' : 'Mening panelim'}</p>
+            <p className="mt-1 text-2xl font-semibold text-white">{isAdmin ? teacherList.length : totalTeacherQuestions}</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
-            <p className="text-xs text-white/45">Qo‘shilgan savollar</p>
-            <p className="mt-1 text-2xl font-semibold text-white">{totalTeacherQuestions}</p>
+            <p className="text-xs text-white/45">{isAdmin ? 'Studentlar' : 'Kontentli o‘yinlar'}</p>
+            <p className="mt-1 text-2xl font-semibold text-white">{isAdmin ? studentList.length : gamesWithContent}</p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
             <p className="text-xs text-white/45">Pending feedback</p>
@@ -1490,9 +1574,18 @@ function GameCard({
 }
 
 function Games() {
+  const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [premiumUnlocked, setPremiumUnlocked] = useState<boolean>(() => hasPremiumSubscription())
   const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const viewParam = searchParams.get('view')
+  const initialCollection: GameCollection =
+    viewParam === 'free' || viewParam === 'premium' || viewParam === 'team' || viewParam === 'classroom' || viewParam === 'brain'
+      ? viewParam
+      : 'all'
+  const [activeCollection, setActiveCollection] = useState<GameCollection>(initialCollection)
+  const [searchValue, setSearchValue] = useState(searchParams.get('q') ?? '')
 
   useEffect(() => {
     setPremiumUnlocked(hasPremiumSubscription())
@@ -1515,6 +1608,11 @@ function Games() {
       setShowPremiumModal(true)
     }
   }, [location.state])
+
+  useEffect(() => {
+    setActiveCollection(initialCollection)
+    setSearchValue(searchParams.get('q') ?? '')
+  }, [initialCollection, searchParams])
 
   const games: GameCardProps[] = [
     {
@@ -1679,25 +1777,81 @@ function Games() {
     },
   ]
 
+  const collectionMeta: Array<{ key: GameCollection; label: string; description: string }> = [
+    { key: 'all', label: 'Hammasi', description: 'Barcha o‘yinlar' },
+    { key: 'free', label: 'Bepul', description: 'Darhol ochiladiganlar' },
+    { key: 'premium', label: 'Premium', description: 'Obuna bilan ochiladi' },
+    { key: 'team', label: 'Jamoaviy', description: '2+ o‘yinchi uchun' },
+    { key: 'classroom', label: 'Classroom', description: 'Darsda tez qo‘llash uchun' },
+    { key: 'brain', label: 'Fokus', description: 'Yakka va tez challenge' },
+  ]
+
+  const normalizedSearch = searchValue.trim().toLowerCase()
+  const filteredGames = games.filter((game) => {
+    const collections = getCollectionsForGame(game.to)
+    const matchesCollection = activeCollection === 'all' || collections.includes(activeCollection)
+    const haystack = `${game.title} ${game.badge} ${game.text}`.toLowerCase()
+    const matchesSearch = !normalizedSearch || haystack.includes(normalizedSearch)
+    return matchesCollection && matchesSearch
+  })
+
+  const applyCollection = (key: GameCollection) => {
+    setActiveCollection(key)
+    const next = new URLSearchParams(searchParams)
+    if (key === 'all') {
+      next.delete('view')
+    } else {
+      next.set('view', key)
+    }
+    if (searchValue.trim()) {
+      next.set('q', searchValue.trim())
+    } else {
+      next.delete('q')
+    }
+    setSearchParams(next, { replace: true })
+  }
+
+  const applySearch = (value: string) => {
+    setSearchValue(value)
+    const next = new URLSearchParams(searchParams)
+    if (activeCollection === 'all') {
+      next.delete('view')
+    } else {
+      next.set('view', activeCollection)
+    }
+    if (value.trim()) {
+      next.set('q', value.trim())
+    } else {
+      next.delete('q')
+    }
+    setSearchParams(next, { replace: true })
+  }
+
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-[#05060a] p-4 text-white sm:p-5 lg:p-6">
       <div className="pointer-events-none absolute left-6 top-4 h-40 w-40 rounded-full bg-violet-500/20 blur-[80px]" />
       <div className="pointer-events-none absolute right-6 top-8 h-44 w-44 rounded-full bg-blue-500/20 blur-[90px]" />
       <div className="pointer-events-none absolute bottom-20 left-1/3 h-36 w-36 rounded-full bg-cyan-400/10 blur-[90px]" />
 
-      <div className="relative overflow-hidden rounded-[1.8rem] border border-white/[0.09] bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.12),transparent_30%),radial-gradient(circle_at_top_right,rgba(56,189,248,0.08),transparent_28%),linear-gradient(180deg,rgba(18,20,30,0.96),rgba(8,10,18,0.96))] px-4 py-4 shadow-[0_20px_70px_rgba(2,8,23,0.46)] backdrop-blur-xl sm:px-5 sm:py-5 lg:px-6 lg:py-5">
+      <div className="relative overflow-hidden rounded-[1.55rem] border border-white/[0.09] bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.12),transparent_30%),radial-gradient(circle_at_top_right,rgba(56,189,248,0.08),transparent_28%),linear-gradient(180deg,rgba(18,20,30,0.96),rgba(8,10,18,0.96))] px-4 py-4 shadow-[0_16px_48px_rgba(2,8,23,0.38)] backdrop-blur-xl sm:px-5 sm:py-4 lg:px-6 lg:py-4">
         <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle,rgba(255,255,255,0.75)_1px,transparent_1.2px)] [background-size:23px_23px]" />
         <div className="pointer-events-none absolute inset-y-0 left-0 w-[34%] bg-gradient-to-r from-violet-400/12 via-violet-400/6 to-transparent blur-3xl" />
 
-        <div className="relative max-w-[38rem] lg:max-w-[40rem]">
+        <div className="relative max-w-[34rem] lg:max-w-[36rem]">
+          <button
+            type="button"
+            onClick={() => navigate('/home')}
+            className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/78 hover:bg-white/10"
+          >
+            ← Back
+          </button>
           <div>
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.34em] text-white/42 sm:text-xs">Game Hub</p>
             <h2 className="max-w-[10ch] text-[clamp(1.7rem,2.7vw,2.7rem)] font-semibold leading-[1.02] tracking-[-0.05em] text-white">
               Playgroundga Xush Kelibsiz
             </h2>
             <p className="mt-3 max-w-[35rem] text-[0.84rem] leading-[1.58] text-white/62 sm:text-[0.9rem] sm:leading-[1.62]">
-              O&apos;yinlarni buzmasdan faqat dizayn yangilandi: premium dark, glow effektlar va glass kartalar bilan
-              tanlash sahifasi. Quyidagi o&apos;yinlardan birini tanlab darhol boshlashingiz mumkin.
+              Quyida qidiruv va filter orqali o‘zingizga mos game’ni tez topishingiz mumkin.
             </p>
           </div>
 
@@ -1733,8 +1887,47 @@ function Games() {
         </div>
       </div>
 
+      <div className="mt-4 rounded-[1.25rem] border border-white/10 bg-white/[0.04] p-3 shadow-[0_14px_32px_rgba(2,8,23,0.18)] backdrop-blur-xl">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/40">Filter</p>
+            <h3 className="mt-1 text-base font-semibold text-white">O‘yinlarni tez toping</h3>
+            <p className="mt-1 text-xs leading-5 text-white/60">Qidiruv va filter orqali mos o‘yinni tanlang.</p>
+          </div>
+          <label className="block w-full max-w-[18rem]">
+            <span className="mb-1.5 block text-[11px] uppercase tracking-[0.18em] text-white/40">Qidiruv</span>
+            <input
+              type="text"
+              value={searchValue}
+              onChange={(event) => applySearch(event.target.value)}
+              placeholder="Masalan: quiz, team, geography..."
+              className="h-10 w-full rounded-xl border border-white/10 bg-black/20 px-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-sky-400/50"
+            />
+          </label>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {collectionMeta.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => applyCollection(item.key)}
+              className={cn(
+                'rounded-full border px-3 py-2 text-sm transition',
+                activeCollection === item.key
+                  ? 'border-sky-300/35 bg-sky-400/15 text-white'
+                  : 'border-white/10 bg-black/20 text-white/70 hover:bg-white/10',
+              )}
+              title={item.description}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {games.map((game) => {
+        {filteredGames.map((game) => {
           const premiumLocked = isPremiumLockedPath(game.to) && !premiumUnlocked
           return (
             <GameCard
@@ -1747,6 +1940,12 @@ function Games() {
           )
         })}
       </div>
+
+      {filteredGames.length === 0 ? (
+        <div className="mt-5 rounded-[1.5rem] border border-dashed border-white/10 bg-white/[0.03] px-5 py-10 text-center text-white/60">
+          Qidiruv yoki filter bo‘yicha mos o‘yin topilmadi. Boshqa kalit so‘z yozib ko‘ring yoki `Hammasi` filtriga qayting.
+        </div>
+      ) : null}
 
       {showPremiumModal ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" role="presentation">
@@ -1817,7 +2016,8 @@ function TugOfWarRoute() {
 }
 
 function FrogPondRoute() {
-  return <FrogPondPage />
+  const navigate = useNavigate()
+  return <FrogPondPage onBack={() => navigate('/games')} />
 }
 
 function ImageQuizRoute() {
@@ -1932,14 +2132,25 @@ function App() {
         </Route>
 
         <Route
-          path="/admin"
+          path="/teacher"
           element={
-            <ProtectedRoute role="admin">
-              <AdminLayout />
+            <ProtectedRoute role="teacher">
+              <PanelLayout mode="teacher" />
             </ProtectedRoute>
           }
         >
-          <Route index element={<HelloAdmin />} />
+          <Route index element={<ControlCenter mode="teacher" />} />
+        </Route>
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <PanelLayout mode="admin" />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<ControlCenter mode="admin" />} />
         </Route>
 
         <Route

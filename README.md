@@ -66,17 +66,19 @@ Ishga tushirish:
 npm run dev:api:fastapi
 ```
 
-## Default admin
+## Admin login
 
-Backend birinchi ishga tushganda seed admin yaratadi:
+Backend `.env` dagi admin credential bilan bitta admin yaratadi.
 
-- Email: `admin@gamehub.local`
-- Password: `admin1234`
-
-Buni `.env` orqali almashtirish mumkin:
+`.env` da o'zingiz qo'ying:
 
 - `SEED_ADMIN_EMAIL`
 - `SEED_ADMIN_PASSWORD`
+
+Telegramga izoh yuborish uchun:
+
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
 
 ## Storage
 
@@ -98,7 +100,7 @@ Frontend default `VITE_API_BASE_URL=http://127.0.0.1:8010` bilan ishlaydi. Teach
 
 - Config: `render.yaml`
 - Root dir: `services/backend`
-- Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Start command: `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 
 Render env vars:
 
@@ -108,9 +110,9 @@ Render env vars:
 
 Muhim:
 
-- backend JSON fayllarga yozadi
-- Render’da persistent disk ulash tavsiya qilinadi
-- aks holda restart yoki redeploydan keyin data yo‘qolishi mumkin
+- backend PostgreSQL ishlatadi
+- Render’da `DATABASE_URL` va admin env vars qo‘yilishi kerak
+- Render deployida migrationlar ishga tushishi kerak, aks holda `/auth/login` 500 qaytaradi va brauzer buni CORS muammosi sifatida ko‘rsatishi mumkin
 
 ### Frontend: Vercel
 

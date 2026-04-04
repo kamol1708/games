@@ -25,7 +25,7 @@ export function CTA({ onPrimaryClick }: CTAProps) {
                   Classroomni yanada jonli va professional ko‘rsatishga tayyormisiz?
                 </h2>
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65 sm:text-base">
-                  Bosh sahifa endi foydalanuvchini ushlab turadi, o‘yinlarni ko‘rsatadi va premium qiymatni aniq tushuntiradi.
+                  Avval games kutubxonasini ko‘ring, keyin o‘zingizga mos formatni tanlang va kerak bo‘lsa teacher panel orqali uni darsingizga moslang.
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">

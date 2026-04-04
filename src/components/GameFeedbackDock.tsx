@@ -37,12 +37,8 @@ export default function GameFeedbackDock() {
   const threads = useGameFeedback(meta?.key)
 
   const approvedItems = useMemo(
-    () => threads.filter((item) => item.status === 'approved'),
+    () => threads,
     [threads],
-  )
-  const myPendingItems = useMemo(
-    () => threads.filter((item) => item.userId === session?.userId && item.status === 'pending'),
-    [threads, session?.userId],
   )
 
   if (!meta) {
@@ -64,7 +60,7 @@ export default function GameFeedbackDock() {
         message: cleanMessage,
       })
       setMessage('')
-      setNotice('Comment adminga yuborildi. Tasdiqlangandan keyin shu o‘yin ichida chiqadi.')
+      setNotice('Comment yuborildi. Filterdan o‘tgan izohlar darhol shu yerda ko‘rinadi.')
       setOpen(true)
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Xabar yuborilmadi.')
@@ -136,7 +132,7 @@ export default function GameFeedbackDock() {
                     }`}
                   />
                   <div className="mt-3 flex items-center justify-between gap-3">
-                    <span className="text-xs text-white/50">Izoh teacher panelga moderatsiya uchun yuboriladi.</span>
+                  <span className="text-xs text-white/50">Yomon so‘zlar filterdan o‘tmaydi. Toza izohlar hammaga ko‘rinadi.</span>
                     <button
                       type="button"
                       disabled={submitting}
@@ -167,29 +163,15 @@ export default function GameFeedbackDock() {
               )}
             </div>
 
-            {session && myPendingItems.length > 0 ? (
-              <div className="rounded-2xl border border-amber-300/15 bg-amber-300/10 p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-100/80">Kutilmoqda</p>
-                <div className="mt-3 space-y-2">
-                  {myPendingItems.slice(0, 2).map((item) => (
-                    <div key={item.id} className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5">
-                      <p className="text-sm text-white/90">{item.message}</p>
-                      <p className="mt-1 text-[11px] text-white/45">{formatStamp(item.createdAt)} · admin tasdig‘i kutilmoqda</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
             <div>
               <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-white">Tasdiqlangan commentlar</p>
+                <p className="text-sm font-semibold text-white">Commentlar</p>
                 <span className="text-xs text-white/40">{approvedItems.length} ta</span>
               </div>
               <div className={`space-y-3 overflow-y-auto pr-1 ${isFrogPond ? 'max-h-56' : 'max-h-72'}`}>
                 {approvedItems.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.03] px-4 py-5 text-sm text-white/50">
-                    Hozircha javob berilgan fikrlar yo‘q.
+                    Hozircha comment yo‘q.
                   </div>
                 ) : (
                   approvedItems.map((item) => (
@@ -203,7 +185,7 @@ export default function GameFeedbackDock() {
                       </div>
                       <div className="mt-2 ml-6 rounded-2xl rounded-tr-md bg-sky-400/12 px-3 py-2.5 text-sm text-sky-50">
                         <p className="text-[11px] text-sky-100/70">
-                          Tasdiqlagan: {item.approvedByName || 'Admin'} · {formatStamp(item.approvedAt ?? item.createdAt)}
+                          Ko‘rindi: {formatStamp(item.approvedAt ?? item.createdAt)}
                         </p>
                       </div>
                     </article>
